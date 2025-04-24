@@ -1,0 +1,86 @@
+{% extends base_template %}
+{% load static %}
+
+{% block title %}Doctors List{% endblock %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/custom.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="content container-fluid">
+    <div class="row">
+        <div class="col-sm-12">
+            <h4 class="page-title mb-4">Our Doctors</h4>
+        </div>
+    </div>
+    <div class="card-box mb-4">
+        <div class="row mb-4">
+            <div class="col-md-4">
+                <form method="get" action="{% url 'core:doctors_list' %}">
+                    <div class="form-group">
+                        <label for="specialty_filter">Filter by Specialty</label>
+                        <select name="specialty" id="specialty_filter" class="form-control select2">
+                            <option value="">All Specialties</option>
+                            {% for specialty in all_specialties %}
+                                <option value="{{ specialty.id }}" {% if selected_specialty == specialty.id|stringformat:"s" %}selected{% endif %}>
+                                    {{ specialty.name }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Apply Filter</button>
+                </form>
+            </div>
+        </div>
+        <div class="row">
+            {% if doctors %}
+                {% for doctor in doctors %}
+                    <div class="col-md-4 mb-3">
+                        <div class="doctor-card card h-100">
+                            <div class="card-body text-center">
+                                <div class="profile-img-wrap mb-3">
+                                    <img class="inline-block rounded-circle" src="{% if doctor.photo %}{{ doctor.photo.url }}{% else %}{% static 'assets/img/user.jpg' %}{% endif %}" alt="{{ doctor.full_name }}" width="80" height="80">
+                                </div>
+                                <h5 class="card-title">{{ doctor.full_name }}</h5>
+                                <p class="card-text">{{ doctor.designation }}</p>
+                                <div class="doctor-rating mb-3">
+                                    <span class="star-rating">
+                                        {% for i in "12345" %}
+                                            {% if i|add:0 <= 4 %}
+                                                <i class="fas fa-star text-warning"></i>
+                                            {% else %}
+                                                <i class="far fa-star text-warning"></i>
+                                            {% endif %}
+                                        {% endfor %}
+                                    </span>
+                                    <span class="rating-value">4.5</span>
+                                </div>
+                                <a href="{% url 'core:doctor_detail' doctor_id=doctor.id %}" class="btn btn-primary btn-sm doctor-action-btn">View Details</a>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <div class="col-12">
+                    <p>No doctors found for the selected specialty.</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+    <script>
+        $(document).ready(function() {
+            $('#specialty_filter').select2({
+                placeholder: "Select a specialty",
+                allowClear: true
+            });
+            $('#specialty_filter').on('change', function() {
+                $(this).closest('form').submit();
+            });
+        });
+    </script>
+{% endblock %}

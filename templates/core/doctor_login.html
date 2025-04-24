@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+{% load static %}
+{% block title %}Doctor Login{% endblock %}
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/custom.css' %}">
+{% endblock %}
+{% block content %}
+<section class="signup-section doctor-signup">
+    <div class="container">
+        <div class="signup-card">
+            <h2>Doctor Login</h2>
+            {% if messages %}
+                <div class="alert alert-danger">
+                    {% for message in messages %}
+                        {{ message }}
+                    {% endfor %}
+                </div>
+            {% endif %}
+            <form method="post">
+                {% csrf_token %}
+                {% load crispy_forms_tags %}
+                {{ form|crispy }}
+                <button type="submit" class="btn-signup">Login</button>
+            </form>
+            <p class="signup-footer">Don't have an account? <a href="{% url 'core:doctor_signup' %}">Sign Up</a></p>
+        </div>
+    </div>
+</section>
+{% endblock %}
+{% block extra_js %}
+{% endblock %}

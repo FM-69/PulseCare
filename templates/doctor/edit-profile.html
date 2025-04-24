@@ -1,0 +1,255 @@
+{% extends 'doctor_base.html' %}
+{% load static crispy_forms_tags %}
+{% block title %}Edit Doctor Profile{% endblock %}
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'assets/css/select2.min.css' %}">
+    <link rel="stylesheet" href="{% static 'assets/css/bootstrap-datetimepicker.min.css' %}">
+    <link rel="stylesheet" href="{% static 'css/custom.css' %}">
+{% endblock %}
+{% block content %}
+<div class="content container-fluid">
+    <div class="row">
+        <div class="col-sm-12">
+            <h4 class="page-title mb-4">Edit Profile</h4>
+        </div>
+    </div>
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} mb-4">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endif %}
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <!-- Basic Information -->
+        <div class="card-box mb-4">
+            <h3 class="card-title">Basic Information</h3>
+            <div class="row">
+                <div class="col-md-12 mb-4">
+                    <div class="profile-img-wrap text-center">
+                        <img class="inline-block rounded-circle" src="{% if form.instance.photo %}{{ form.instance.photo.url }}{% else %}{% static 'assets/img/user.jpg' %}{% endif %}" alt="Doctor" width="120" height="120">
+                    </div>
+                </div>
+                <div class="col-md-6 mb-3">
+                    {{ form.full_name|as_crispy_field }}
+                </div>
+                <div class="col-md-6 mb-3">
+                    {{ form.designation|as_crispy_field }}
+                </div>
+                <div class="col-md-6 mb-3">
+                    {{ form.specialty|as_crispy_field }}
+                </div>
+                <div class="col-md-6 mb-3">
+                    {{ form.number|as_crispy_field }}
+                </div>
+                <div class="col-md-6 mb-3">
+                    {{ form.dob|as_crispy_field }}
+                </div>
+                <div class="col-md-6 mb-3">
+                    {{ form.gender|as_crispy_field }}
+                </div>
+            </div>
+        </div>
+        <!-- Profile Photo -->
+        <div class="card-box mb-4">
+            <h3 class="card-title">Profile Photo</h3>
+            <div class="row">
+                <div class="col-md-12 mb-3">
+                    <div class="custom-file" style="max-width: 300px; margin: 0 auto;">
+                        <input type="file" class="custom-file-input" id="{{ form.photo.id_for_label }}" name="{{ form.photo.name }}" accept="image/*">
+                        <label class="custom-file-label" for="{{ form.photo.id_for_label }}">Choose New Photo</label>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Contact Information -->
+        <div class="card-box mb-4">
+            <h3 class="card-title">Contact Information</h3>
+            <div class="row">
+                <div class="col-md-12 mb-3">
+                    {{ form.address|as_crispy_field }}
+                </div>
+                <div class="col-md-6 mb-3">
+                    {{ form.consultation_fee|as_crispy_field }}
+                </div>
+                <div class="col-md-6 mb-3">
+                    {{ form.certificate_url|as_crispy_field }}
+                </div>
+            </div>
+        </div>
+        <!-- Professional Information -->
+        <div class="card-box mb-4">
+            <h3 class="card-title">Professional Information</h3>
+            <div class="row">
+                <div class="col-md-12 mb-3">
+                    {{ form.qualification|as_crispy_field }}
+                </div>
+                <div class="col-md-12 mb-3">
+                    {{ form.details|as_crispy_field }}
+                </div>
+            </div>
+        </div>
+        <!-- Experience Information -->
+        <div class="card-box mb-4">
+            <h3 class="card-title">Experience Information</h3>
+            {{ formset.management_form }}
+            <div id="experience-accordion" class="accordion">
+                {% for form in formset %}
+                    <div class="experience-formset card mb-2">
+                        <div class="card-header" id="heading-{{ forloop.counter }}">
+                            <h5 class="mb-0">
+                                <button class="btn btn-link" type="button" data-toggle="collapse" data-target="#collapse-{{ forloop.counter }}" aria-expanded="{% if forloop.first %}true{% else %}false{% endif %}" aria-controls="collapse-{{ forloop.counter }}">
+                                    Experience {{ forloop.counter }}{% if form.instance.pk %} - {{ form.instance.medical_company }}{% endif %}
+                                </button>
+                            </h5>
+                        </div>
+                        <div id="collapse-{{ forloop.counter }}" class="collapse {% if forloop.first %}show{% endif %}" aria-labelledby="heading-{{ forloop.counter }}" data-parent="#experience-accordion">
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        {{ form.medical_company|as_crispy_field }}
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        {{ form.designation|as_crispy_field }}
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        {{ form.department|as_crispy_field }}
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        {{ form.employment_status|as_crispy_field }}
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        {{ form.start_date|as_crispy_field }}
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        {{ form.end_date|as_crispy_field }}
+                                    </div>
+                                    {% if form.instance.pk %}
+                                        <div class="col-md-6 mb-3">
+                                            <label class="focus-label">Period</label>
+                                            <input type="text" class="form-control" value="{{ form.instance.period }}" readonly>
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label class="focus-label">Total Years</label>
+                                            <input type="text" class="form-control" value="{{ form.instance.total_years }}" readonly>
+                                        </div>
+                                    {% endif %}
+                                    {% if formset.can_delete %}
+                                        <div class="col-md-12 mb-3">
+                                            <div class="form-check">
+                                                {{ form.DELETE }}
+                                                <label class="form-check-label" for="{{ form.DELETE.id_for_label }}">Delete this experience</label>
+                                            </div>
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+            <div class="add-more mt-3">
+                <a href="#" class="btn btn-primary add-experience"><i class="fa fa-plus"></i> Add Experience</a>
+            </div>
+        </div>
+        <!-- Submit Button -->
+        <div class="text-center mb-4">
+            <button class="btn btn-primary submit-btn" type="submit">Save Changes</button>
+        </div>
+    </form>
+</div>
+{% endblock %}
+{% block extra_js %}
+    <script src="{% static 'assets/js/select2.min.js' %}"></script>
+    <script src="{% static 'assets/js/moment.min.js' %}"></script>
+    <script src="{% static 'assets/js/bootstrap-datetimepicker.min.js' %}"></script>
+    <script>
+        $(document).ready(function() {
+            // Initialize Select2
+            $('.select2').select2({
+                width: '100%',
+                dropdownCssClass: 'select2-dropdown-zindex'
+            });
+
+            // Initialize DateTimePicker
+            $('.datetimepicker').datetimepicker({
+                format: 'MM/DD/YYYY',
+                icons: {
+                    date: "fa fa-calendar",
+                    up: "fa fa-chevron-up",
+                    down: "fa fa-chevron-down",
+                    previous: 'fa fa-chevron-left',
+                    next: 'fa fa-chevron-right',
+                    today: 'fa fa-screenshot',
+                    clear: 'fa fa-trash',
+                    close: 'fa fa-remove'
+                }
+            });
+
+            // Add more experience form
+            $('.add-experience').click(function(e) {
+                e.preventDefault();
+                var formsetPrefix = '{{ formset.prefix }}';
+                var formCount = parseInt($('#id_' + formsetPrefix + '-TOTAL_FORMS').val());
+                var newForm = $('.experience-formset:first').clone(true);
+                newForm.find(':input').each(function() {
+                    var name = $(this).attr('name');
+                    if (name) {
+                        $(this).attr('name', name.replace('-0-', '-' + formCount + '-'));
+                        $(this).attr('id', 'id_' + name.replace('-0-', '-' + formCount + '-'));
+                    }
+                    if ($(this).is('select')) {
+                        $(this).val('').select2({
+                            width: '100%',
+                            dropdownCssClass: 'select2-dropdown-zindex'
+                        });
+                    } else {
+                        $(this).val('');
+                    }
+                });
+                newForm.find('.select2-container').remove();
+                newForm.find('select').addClass('select2').select2({
+                    width: '100%',
+                    dropdownCssClass: 'select2-dropdown-zindex'
+                });
+                newForm.find('.datetimepicker').datetimepicker({
+                    format: 'MM/DD/YYYY',
+                    icons: {
+                        date: "fa fa-calendar",
+                        up: "fa fa-chevron-up",
+                        down: "fa fa-chevron-down",
+                        previous: 'fa fa-chevron-left',
+                        next: 'fa fa-chevron-right',
+                        today: 'fa fa-screenshot',
+                        clear: 'fa fa-trash',
+                        close: 'fa fa-remove'
+                    }
+                });
+                newForm.find('.collapse').removeClass('show');
+                newForm.find('.card-header').attr('id', 'heading-' + formCount);
+                newForm.find('.btn-link').attr({
+                    'data-target': '#collapse-' + formCount,
+                    'aria-controls': 'collapse-' + formCount
+                }).text('Experience ' + (formCount + 1));
+                newForm.find('.collapse').attr({
+                    'id': 'collapse-' + formCount,
+                    'aria-labelledby': 'heading-' + formCount
+                });
+                newForm.insertBefore('.add-more');
+                $('#id_' + formsetPrefix + '-TOTAL_FORMS').val(formCount + 1);
+            });
+
+            // Ensure select2 re-initializes on formset changes
+            $(document).on('select2:open', function() {
+                $('.select2-container').css('z-index', 9999);
+            });
+
+            // Update custom file input label on file selection
+            $('.custom-file-input').on('change', function() {
+                var fileName = $(this).val().split('\\').pop();
+                $(this).siblings('.custom-file-label').addClass('selected').html(fileName || 'Choose New Photo');
+            });
+        });
+    </script>
+{% endblock %}

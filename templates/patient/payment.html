@@ -1,0 +1,94 @@
+{% extends 'patient_base.html' %}
+{% load static %}
+
+{% block title %}Payment - Schedule Appointment{% endblock %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/custom.css' %}">
+    <style>
+        .payment-container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .summary-box, .details-box, .payment-methods {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        .summary-box h5, .details-box h5, .payment-methods h5 {
+            margin-bottom: 15px;
+            font-size: 18px;
+            color: #333;
+        }
+        .summary-box p, .details-box p {
+            margin: 5px 0;
+            font-size: 16px;
+        }
+        .payment-methods label {
+            display: block;
+            margin-bottom: 10px;
+            font-size: 16px;
+        }
+        .payment-methods input[type="radio"] {
+            margin-right: 10px;
+        }
+        .pay-now-btn {
+            background-color: #28a745;
+            border-color: #28a745;
+            padding: 10px 30px;
+            font-size: 16px;
+        }
+        .pay-now-btn:hover {
+            background-color: #218838;
+            border-color: #1e7e34;
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+<div class="content container-fluid payment-container">
+    <div class="row">
+        <div class="col-sm-12">
+            <h4 class="page-title">Complete Your Payment</h4>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-12">
+            <div class="summary-box">
+                <h5>Appointment Summary</h5>
+                <p><strong>Doctor:</strong> {{ doctor.full_name }}</p>
+                <p><strong>Appointment Type:</strong> {{ appointment_type_display }}</p>
+                <p><strong>Date:</strong> {{ date }}</p>
+                <p><strong>Time:</strong> {{ time_display }}</p>
+                <p><strong>Amount:</strong> ${{doctor.consultation_fee}}</p>
+            </div>
+            <div class="details-box">
+                <h5>Your Details</h5>
+                <p><strong>Name:</strong> {{ user.get_full_name|default:user.username }}</p>
+                <p><strong>Email:</strong> {{ user.email }}</p>
+                <p><strong>Phone:</strong> {{ user.profile.phone|default:"Not provided" }}</p>
+            </div>
+            <form method="post">
+                {% csrf_token %}
+                <input type="hidden" name="doctor_id" value="{{ doctor.id }}">
+                <input type="hidden" name="appointment_type" value="{{ appointment_type }}">
+                <input type="hidden" name="date" value="{{ date }}">
+                <input type="hidden" name="time" value="{{ time }}">
+                <div class="payment-methods">
+                    <h5>Select Payment Method</h5>
+                    <label>
+                        <input type="radio" name="payment_method" value="credit_card" required> Credit/Debit Card
+                    </label>
+                    <label>
+                        <input type="radio" name="payment_method" value="mobile_banking"> Mobile Banking (bKash, Nagad)
+                    </label>
+                </div>
+                <div class="text-right">
+                    <button type="submit" class="btn pay-now-btn">Pay Now</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

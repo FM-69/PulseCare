@@ -1,0 +1,635 @@
+.signup-section {
+    background: #f8f9fa;
+    padding: 60px 0;
+}
+
+.signup-card {
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    padding: 40px;
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.signup-card h2 {
+    font-family: 'Poppins', sans-serif;
+    font-weight: 600;
+    color: #333;
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    font-family: 'Poppins', sans-serif;
+    font-weight: 500;
+    color: #555;
+    margin-bottom: 8px;
+    display: block;
+}
+
+/* Specific label styling for specialty, gender, dob, and address */
+#div_id_gender label
+ {
+    font-family: 'Poppins', sans-serif;
+    font-weight: 500;
+    color: #555;
+    font-size: 14px;
+    margin-bottom: 10px;
+    padding-top: 5px;
+    display: block;
+    line-height: 1.5;
+}
+
+#div_id_dob label
+{
+font-family: 'Poppins', sans-serif;
+    font-weight: 500;
+    color: #555;
+    font-size: 14px;
+    margin-bottom: 0px;
+    padding-top: 60px;
+    display: block;
+    line-height: 1.5;
+   
+    z-index: 1;
+}
+
+.signup-section .form-group#div_id_gender select {
+    position: relative;
+    z-index: 2000;
+}
+#div_id_address label {
+    font-family: 'Poppins', sans-serif;
+    font-weight: 500;
+    color: #555;
+    font-size: 14px;
+    margin-bottom: 0px;
+    padding-top: 60px;
+    display: block;
+    line-height: 1.5;
+    position: relative;
+    z-index: 1;
+}
+
+
+
+.form-control {
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    padding: 10px;
+    font-size: 14px;
+    font-family: 'Poppins', sans-serif;
+    transition: border-color 0.3s ease;
+}
+
+.form-control:focus {
+    border-color: #00c1f1;
+    box-shadow: 0 0 5px rgba(0, 193, 241, 0.3);
+}
+
+.form-group textarea.form-control {
+    height: 100px;
+}
+
+.btn-signup {
+    background: #00c1f1;
+    border: none;
+    border-radius: 5px;
+    padding: 12px;
+    width: 100%;
+    font-family: 'Poppins', sans-serif;
+    font-weight: 500;
+    font-size: 16px;
+    color: #fff;
+    transition: background 0.3s ease;
+}
+
+.btn-signup:hover {
+    background: #0098c1;
+}
+
+.alert-danger {
+    background: #f8d7da;
+    color: #721c24;
+    padding: 10px;
+    border-radius: 5px;
+    margin-bottom: 20px;
+    font-size: 14px;
+}
+
+.signup-footer {
+    text-align: center;
+    margin-top: 20px;
+    font-family: 'Poppins', sans-serif;
+    font-size: 14px;
+    color: #555;
+}
+
+.signup-footer a {
+    color: #00c1f1;
+    text-decoration: none;
+}
+
+.signup-footer a:hover {
+    text-decoration: underline;
+}
+
+.help-block {
+    color: #721c24;
+    font-size: 12px;
+    margin-top: 5px;
+}
+
+/* Datepicker input styling */
+#dob-picker {
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    padding: 10px;
+    font-size: 14px;
+    font-family: 'Poppins', sans-serif;
+}
+
+.datepicker {
+    font-family: 'Poppins', sans-serif;
+    border-radius: 5px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.datepicker td.day:hover,
+.datepicker td.active,
+.datepicker td.active:hover,
+.datepicker thead tr:first-child th:hover {
+    background: #00c1f1 !important;
+    color: #fff;
+}
+
+.datepicker td.active {
+    background-color: #00c1f1 !important;
+}
+
+
+/* Dashboard and Home Styling */
+.dashboard-section, .home-section {
+    background: #f8f9fa;
+    padding: 60px 0;
+}
+
+.dashboard-card, .home-card {
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    padding: 40px;
+    max-width: 800px;
+    margin: 0 auto;
+    text-align: center;
+}
+
+.dashboard-card h2, .home-card h2 {
+    font-family: 'Poppins', sans-serif;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 20px;
+}
+
+.dashboard-card p, .home-card p {
+    font-family: 'Poppins', sans-serif;
+    font-size: 16px;
+    color: #555;
+    margin-bottom: 20px;
+}
+
+.btn-danger {
+    background: #dc3545;
+    border: none;
+    padding: 10px 20px;
+    font-family: 'Poppins', sans-serif;
+    font-size: 14px;
+    color: #fff;
+    border-radius: 5px;
+    transition: background 0.3s ease;
+}
+
+.btn-danger:hover {
+    background: #c82333;
+}
+
+.btn-primary {
+    background: #007bff;
+    border: none;
+    padding: 10px 20px;
+    font-family: 'Poppins', sans-serif;
+    font-size: 14px;
+    color: #fff;
+    border-radius: 5px;
+    transition: background 0.3s ease;
+}
+
+.btn-primary:hover {
+    background: #0056b3;
+}
+
+.mr-2 {
+    margin-right: 10px;
+}
+
+/* Preclinic-specific overrides */
+.alert {
+    margin: 20px 0;
+    border-radius: 5px;
+}
+
+.alert-success {
+    background: #d4edda;
+    color: #155724;
+    border-color: #c3e6cb;
+}
+
+/* Profile-specific styles */
+.profile-header {
+    padding: 20px 0;
+    background: #fff;
+    border-bottom: 1px solid #eee;
+}
+
+.profile-header .profile-img-wrap {
+    margin-bottom: 15px;
+}
+
+.profile-header .profile-img-wrap img {
+    width: 120px;
+    height: 120px;
+    border: 2px solid #007bff;
+    box-shadow: 0 2px 8px rgba(0, 123, 255, 0.2);
+    object-fit: cover;
+    transition: transform 0.3s ease;
+}
+
+.profile-header .profile-img-wrap img:hover {
+    transform: scale(1.05);
+}
+
+.profile-header h3 {
+    font-family: 'Poppins', sans-serif;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 5px;
+}
+
+.profile-header p {
+    font-family: 'Poppins', sans-serif;
+    color: #555;
+    font-size: 16px;
+}
+
+.personal-info li {
+    margin-bottom: 12px;
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.personal-info .title {
+    font-weight: 500;
+    color: #333;
+    width: 150px;
+}
+
+.personal-info .text {
+    color: #555;
+    flex: 1;
+}
+
+.personal-info .text a {
+    color: #007bff;
+    text-decoration: none;
+}
+
+.personal-info .text a:hover {
+    text-decoration: underline;
+}
+
+/* Edit Profile styles */
+.card-box {
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.experience-formset {
+    margin-bottom: 10px;
+}
+
+.experience-formset .card-header {
+    background: #f8f9fa;
+    border-bottom: 1px solid #ddd;
+}
+
+.experience-formset .btn-link {
+    color: #007bff;
+    text-decoration: none;
+}
+
+.experience-formset .btn-link:hover {
+    color: #0056b3;
+}
+
+.add-more {
+    margin-top: 20px;
+}
+
+.form-control {
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    padding: 8px;
+    font-size: 14px;
+}
+
+.form-control:focus {
+    border-color: #007bff;
+    box-shadow: 0 0 5px rgba(0, 123, 255, 0.3);
+}
+
+.select2-container {
+    width: 100% !important;
+}
+
+.select2-container .select2-selection--single {
+    height: 38px;
+    border: 1px solid #ccc;
+}
+
+.select2-container--default .select2-selection--single .select2-selection__rendered {
+    line-height: 38px;
+    font-size: 14px;
+}
+
+.select2-container--default .select2-selection--single .select2-selection__arrow {
+    height: 36px;
+}
+
+.select2-dropdown-zindex {
+    z-index: 9999 !important;
+}
+
+.datetimepicker {
+    z-index: 9999 !important;
+}
+
+.profile-img-wrap img {
+    object-fit: cover;
+    border: 2px solid #007bff;
+    box-shadow: 0 2px 8px rgba(0, 123, 255, 0.2);
+}
+
+.accordion .card {
+    border: none;
+}
+
+.accordion .card-body {
+    padding: 15px;
+}
+
+/* Custom File Input Styles */
+.custom-file {
+    position: relative;
+    overflow: hidden;
+}
+
+.custom-file-input {
+    cursor: pointer;
+    z-index: 2;
+}
+
+.custom-file-label {
+    background: #28a745;
+    color: #fff;
+    border-radius: 4px;
+    padding: 8px 12px;
+    font-size: 14px;
+    font-family: 'Poppins', sans-serif;
+    text-align: center;
+    cursor: pointer;
+}
+
+.custom-file-label::after {
+    content: none;
+}
+
+.custom-file-label.selected {
+    background: #218838;
+}
+
+/* Profile Photo Section */
+.profile-photo-section .custom-file {
+    display: block;
+    margin: 0 auto;
+}
+
+.profile-photo-section .custom-file-label {
+    background: #28a745;
+}
+
+.profile-photo-section .custom-file-label.selected {
+    background: #218838;
+}
+
+/* Experience Box */
+.experience-box {
+    margin-bottom: 20px;
+    padding: 15px;
+    background: #f8f9fa;
+    border-radius: 6px;
+}
+
+.experience-box h5 {
+    font-family: 'Poppins', sans-serif;
+    font-weight: 500;
+    color: #333;
+    margin-bottom: 8px;
+}
+
+.experience-box p {
+    font-family: 'Poppins', sans-serif;
+    color: #555;
+    margin-bottom: 5px;
+}
+
+/* Doctors List Page */
+.doctor-card {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.doctor-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+}
+
+.doctor-card .profile-img-wrap img {
+    width: 80px;
+    height: 80px;
+    border: 2px solid #007bff;
+    box-shadow: 0 2px 5px rgba(0, 123, 255, 0.2);
+}
+
+.doctor-card .card-title {
+    font-family: 'Poppins', sans-serif;
+    font-weight: 500;
+    font-size: 18px;
+    color: #333;
+    margin-bottom: 10px;
+}
+
+.doctor-card .card-text {
+    font-family: 'Poppins', sans-serif;
+    font-size: 14px;
+    color: #555;
+    margin-bottom: 15px;
+}
+
+.doctor-card .btn-primary {
+    font-size: 13px;
+    padding: 8px 15px;
+}
+
+.doctor-rating {
+    font-family: 'Poppins', sans-serif;
+    font-size: 14px;
+    color: #555;
+}
+
+.star-rating i {
+    margin-right: 3px;
+}
+
+.rating-value {
+    margin-left: 5px;
+    font-weight: 500;
+}
+
+.doctor-action-btn {
+    background: #28a745;
+    border-color: #28a745;
+}
+
+.doctor-action-btn:hover {
+    background: #218838;
+    border-color: #218838;
+}
+
+/* Filter Dropdown */
+#specialty_filter {
+    width: 100%;
+}
+
+.select2-container .select2-selection--single {
+    height: 38px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+}
+
+.select2-container--default .select2-selection--single .select2-selection__rendered {
+    line-height: 38px;
+    font-size: 14px;
+    color: #555;
+}
+
+.select2-container--default .select2-selection--single .select2-selection__arrow {
+    height: 36px;
+}
+
+.select2-container--default .select2-selection--single .select2-selection__placeholder {
+    color: #999;
+}
+/* Custom styles for PulseCare */
+
+/* Topbar styles */
+.topbar {
+    background: #f8f9fa;
+    padding: 10px 0;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.cart-link {
+    color: #333;
+    font-size: 18px;
+    position: relative;
+    text-decoration: none;
+}
+
+.cart-link .badge {
+    position: absolute;
+    top: -10px;
+    right: -10px;
+    font-size: 12px;
+    padding: 3px 6px;
+}
+
+/* Other existing styles (if any) */
+.profile-summary {
+    background: #f8f9fa;
+    padding: 20px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+}
+
+.profile-summary h5 {
+    margin-bottom: 15px;
+}
+
+.profile-summary p {
+    margin-bottom: 10px;
+}
+
+.appointments-table th, .appointments-table td,
+.payments-table th, .payments-table td,
+.orders-table th, .orders-table td,
+.cart-table th, .cart-table td {
+    vertical-align: middle;
+}
+
+.no-appointments, .no-payments, .no-orders {
+    color: #dc3545;
+    font-style: italic;
+}
+
+.product-card {
+    margin-bottom: 20px;
+}
+
+.product-card .card-body {
+    padding: 15px;
+}
+
+.filter-section {
+    margin-bottom: 20px;
+}
+
+.order-summary {
+    background: #f8f9fa;
+    padding: 20px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+}
+
+.order-summary p {
+    margin-bottom: 10px;
+}
+
+.payment-details {
+    background: #f8f9fa;
+    padding: 20px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+}
+
+.payment-details p {
+    margin-bottom: 10px;
+}
+
+.payment-form label {
+    font-weight: 500;
+}

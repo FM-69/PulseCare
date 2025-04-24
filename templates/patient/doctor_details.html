@@ -1,0 +1,147 @@
+{% extends 'patient_base.html' %}
+{% load static %}
+{% block title %}My Profile{% endblock %}
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/custom.css' %}">
+{% endblock %}
+{% block content %}
+<div class="content container-fluid">
+    <div class="row">
+        <div class="col-sm-7 col-6">
+            <h4 class="page-title">My Profile</h4>
+        </div>
+       
+    </div>
+    <div class="card-box profile-header">
+        <div class="row align-items-start">
+            <div class="col-md-3 text-center text-md-left position-relative">
+                <div class="profile-img-wrap mb-3">
+                    <img class="inline-block rounded-circle" src="{% if doctor.photo %}{{ doctor.photo.url }}{% else %}{% static 'assets/img/user.jpg' %}{% endif %}" alt="{{ doctor.full_name }}" width="120" height="120">
+                    <span class="online-badge">Online</span>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="profile-info-left">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <h3 class="user-name m-t-0 mb-1">{{ doctor.full_name }}</h3>
+                            <p class="qualifications mb-1">MBBS, DDV (Dermatology)</p>
+                            <p class="training mb-2">Training/Courses: CCD (Diabetology)</p>
+                            <span class="specialty-tag">{{ doctor.specialty }}</span>
+                            <p class="email mt-2"><i class="fas fa-envelope mr-2"></i><a href="mailto:{{ doctor.email }}">{{ doctor.email }}</a></p>
+                        </div>
+                        <a href="#" class="share-icon"><i class="fas fa-share-alt"></i></a>
+                    </div>
+                    <div class="doctor-stats mt-3">
+                        <div class="stat-item">
+                            <span class="stat-label">Total Experience</span>
+                            <span class="stat-value">
+                                {% with total_years=0 %}
+                                    {% for exp in doctor.experiences.all %}
+                                        {% with total_years=total_years|add:exp.total_years %}
+                                            {% if forloop.last %}
+                                                {{ total_years|floatformat:1 }} Years
+                                            {% endif %}
+                                        {% endwith %}
+                                    {% empty %}
+                                        Not provided
+                                    {% endfor %}
+                                {% endwith %}
+                            </span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">BMDC Number</span>
+                            <span class="stat-value">72892</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Total Rating</span>
+                            <span class="stat-value"><i class="fas fa-star text-warning mr-1"></i>4.9 (1482)</span>
+                        </div>
+                    </div>
+                    <p class="workplace mt-3">Working in Ad-din Barrister Rafique Hoque Medical Hospital</p>
+                </div>
+            </div>
+            <div class="col-md-3 text-center text-md-right">
+                <div class="consultation-fee mb-3">
+                    <p class="fee-label">Consultation Fee</p>
+                    <p class="fee-amount"><span class="original-fee">{{doctor.consultation_fee}} (Inc. VAT)</span></p>
+                </div>
+                <a href="{% url 'core:schedule_appointment' doctor_id=doctor.id %}" class="btn btn-success btn-lg see-doctor-btn">See Doctor Now</a>
+            </div>
+        </div>
+    </div>
+    <div class="profile-tabs">
+        <ul class="nav nav-tabs nav-tabs-bottom">
+            <li class="nav-item"><a class="nav-link active" href="#about-cont" data-toggle="tab">About</a></li>
+            <li class="nav-item"><a class="nav-link" href="#bottom-tab2" data-toggle="tab">Profile</a></li>
+            <li class="nav-item"><a class="nav-link" href="#bottom-tab3" data-toggle="tab">Messages</a></li>
+        </ul>
+        <div class="tab-content">
+            <div class="tab-pane show active" id="about-cont">
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="card-box">
+                            <h3 class="card-title">Education Information</h3>
+                            <div class="experience-box">
+                                <ul class="experience-list">
+                                    <li>
+                                        <div class="experience-user">
+                                            <div class="before-circle"></div>
+                                        </div>
+                                        <div class="experience-content">
+                                            <div class="timeline-content">
+                                                <a href="#" class="name">Medical College (UG)</a>
+                                                <div>MBBS</div>
+                                                <span class="time">2000 - 2004</span>
+                                            </div>
+                                        </div>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="card-box mb-0">
+                            <h3 class="card-title">Experience</h3>
+                            <div class="experience-box">
+                                <ul class="experience-list">
+                                    {% for experience in doctor.experiences.all %}
+                                        <li>
+                                            <div class="experience-user">
+                                                <div class="before-circle"></div>
+                                            </div>
+                                            <div class="experience-content">
+                                                <div class="timeline-content">
+                                                    <a href="#" class="name">{{ experience.designation }} at {{ experience.medical_company.name }}</a>
+                                                    <div>{{ experience.department }} ({{ experience.employment_status }})</div>
+                                                    <span class="time">{{ experience.period }}</span>
+                                                </div>
+                                            </div>
+                                        </li>
+                                    {% empty %}
+                                        <li>No experience information available.</li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="tab-pane" id="bottom-tab2">
+                Additional profile information (coming soon)
+            </div>
+            <div class="tab-pane" id="bottom-tab3">
+                Messages (coming soon)
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block extra_js %}
+    <script>
+        $(document).ready(function() {
+            $('.nav-tabs a').on('click', function(e) {
+                e.preventDefault();
+                $(this).tab('show');
+            });
+        });
+    </script>
+{% endblock %}

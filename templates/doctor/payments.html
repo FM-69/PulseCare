@@ -1,0 +1,58 @@
+{% extends 'doctor_base.html' %}
+{% load static %}
+
+{% block title %}Payment Collections{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-12">
+        <h4 class="mb-4">Payment Collections</h4>
+    </div>
+</div>
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h4 class="card-title d-inline-block">Payments</h4>
+                <a href="{% url 'core:doctor_dashboard' %}" class="btn btn-secondary float-right">Back to Dashboard</a>
+            </div>
+            <div class="card-body">
+                {% if payments %}
+                    <div class="table-responsive">
+                        <table class="table table-bordered">
+                            <thead>
+                                <tr>
+                                    <th>Patient Email</th>
+                                    <th>Appointment Date</th>
+                                    <th>Amount</th>
+                                    <th>Payment Method</th>
+                                    <th>Payment Date</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for payment in payments %}
+                                    <tr>
+                                        <td>{{ payment.patient.email }}</td>
+                                        <td>{{ payment.appointment.date|date:"Y-m-d" }}</td>
+                                        <td>{{ payment.amount }}</td>
+                                        <td>{{ payment.payment_method }}</td>
+                                        <td>{{ payment.payment_date|date:"Y-m-d H:i" }}</td>
+                                        <td>{{ payment.status }}</td>
+                                        <td>
+                                            <a href="{% url 'core:patient_detail' patient_id=payment.patient.id %}" class="btn btn-primary btn-sm">View Patient</a>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <p>No payments found.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

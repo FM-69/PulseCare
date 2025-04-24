@@ -1,0 +1,79 @@
+{% extends base_template %}
+{% load static %}
+
+{% block title %}Products{% endblock %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/custom.css' %}">
+    <style>
+        .product-card {
+            margin-bottom: 20px;
+        }
+        .product-card .card-body {
+            padding: 15px;
+        }
+        .filter-section {
+            margin-bottom: 20px;
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+<div class="content container-fluid">
+    <div class="row">
+        <div class="col-sm-12">
+            <h4 class="page-title">Lab Tests, Procedures & Medicines</h4>
+        </div>
+    </div>
+    <div class="row filter-section">
+        <div class="col-md-4">
+            <form method="get">
+                <div class="form-group">
+                    <label for="category">Filter by Category</label>
+                    <select name="category" id="category" class="form-control" onchange="this.form.submit()">
+                        <option value="">All Categories</option>
+                        {% for category_value, category_label in categories %}
+                            <option value="{{ category_value }}" {% if selected_category == category_value %}selected{% endif %}>
+                                {{ category_label }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </form>
+        </div>
+    </div>
+    <div class="row">
+        {% for product in products %}
+            <div class="col-md-4">
+                <div class="card product-card">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ product.name }}</h5>
+                        <p class="card-text"><strong>Category:</strong> {{ product.get_category_display }}</p>
+                        <p class="card-text"><strong>Price:</strong> ${{ product.price }}</p>
+                        {% if product.description %}
+                            <p class="card-text">{{ product.description }}</p>
+                        {% endif %}
+                        {% if request.user.is_authenticated and request.user.profile.role == "PATIENT" %}
+                            <form method="post" action="{% url 'core:add_to_cart' %}">
+                                {% csrf_token %}
+                                <input type="hidden" name="product_id" value="{{ product.id }}">
+                                <div class="form-group">
+                                    <label for="quantity_{{ product.id }}">Quantity</label>
+                                    <input type="number" name="quantity" id="quantity_{{ product.id }}" value="1" min="1" class="form-control" style="width: 100px;">
+                                </div>
+                                <button type="submit" class="btn btn-primary">Add to Cart</button>
+                            </form>
+                        {% else %}
+                            <a href="{% url 'core:patient_login' %}" class="btn btn-primary">Login to Add to Cart</a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        {% empty %}
+            <div class="col-12">
+                <p>No products available.</p>
+            </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

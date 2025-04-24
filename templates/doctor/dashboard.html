@@ -1,0 +1,183 @@
+{% extends 'doctor_base.html' %}
+{% load static %}
+{% block title %}Doctor Dashboard{% endblock %}
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/custom.css' %}">
+    <style>
+        .message-requests-table th, .message-requests-table td {
+            vertical-align: middle;
+        }
+        .no-requests {
+            color: #dc3545;
+            font-style: italic;
+        }
+    </style>
+{% endblock %}
+{% block content %}
+<div class="row">
+    <div class="col-md-12">
+        <h4 class="mb-4">Welcome, Dr. {{ user.doctor.full_name }}!</h4>
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-6 col-sm-6 col-lg-6 col-xl-3">
+        <div class="dash-widget">
+            <span class="dash-widget-bg1"><i class="fa fa-stethoscope" aria-hidden="true"></i></span>
+            <div class="dash-widget-info text-right">
+                <h3>0</h3>
+                <span class="widget-title1">Appointments Today <i class="fa fa-check" aria-hidden="true"></i></span>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 col-sm-6 col-lg-6 col-xl-3">
+        <div class="dash-widget">
+            <span class="dash-widget-bg2"><i class="fa fa-user-o"></i></span>
+            <div class="dash-widget-info text-right">
+                <h3>{{ patients|length }}</h3>
+                <span class="widget-title2">Patients <i class="fa fa-check" aria-hidden="true"></i></span>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 col-sm-6 col-lg-6 col-xl-3">
+        <div class="dash-widget">
+            <span class="dash-widget-bg3"><i class="fa fa-user-md" aria-hidden="true"></i></span>
+            <div class="dash-widget-info text-right">
+                <h3>0</h3>
+                <span class="widget-title3">Consultations <i class="fa fa-check" aria-hidden="true"></i></span>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 col-sm-6 col-lg-6 col-xl-3">
+        <div class="dash-widget">
+            <span class="dash-widget-bg4"><i class="fa fa-heartbeat" aria-hidden="true"></i></span>
+            <div class="dash-widget-info text-right">
+                <h3>{{ message_requests.count }}</h3>
+                <span class="widget-title4">Pending Requests <i class="fa fa-check" aria-hidden="true"></i></span>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="row">
+    <div class="col-12 col-md-6 col-lg-8 col-xl-8">
+        <div class="card">
+            <div class="card-header">
+                <h4 class="card-title d-inline-block">Upcoming Appointments</h4>
+                <a href="#" class="btn btn-primary float-right">View all</a>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table mb-0">
+                        <thead class="d-none">
+                            <tr>
+                                <th>Patient Name</th>
+                                <th>Doctor Name</th>
+                                <th>Timing</th>
+                                <th class="text-right">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td style="min-width: 200px;">
+                                    <a class="avatar" href="#">P</a>
+                                    <h2><a href="#">Placeholder Patient <span>City, Country</span></a></h2>
+                                </td>
+                                <td>
+                                    <h5 class="time-title p-0">Appointment With</h5>
+                                    <p>Dr. {{ user.doctor.full_name }}</p>
+                                </td>
+                                <td>
+                                    <h5 class="time-title p-0">Timing</h5>
+                                    <p>7:00 PM</p>
+                                </td>
+                                <td class="text-right">
+                                    <a href="#" class="btn btn-outline-primary take-btn">Take up</a>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <!-- Moved Pending Message Requests Section Here -->
+        <div class="card">
+            <div class="card-header">
+                <h4 class="card-title d-inline-block">Pending Message Requests</h4>
+            </div>
+            <div class="card-body">
+                {% if message_requests %}
+                    <div class="table-responsive">
+                        <table class="table table-bordered message-requests-table">
+                            <thead>
+                                <tr>
+                                    <th>Patient Email</th>
+                                    <th>Request Sent At</th>
+                                    <th>Status</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for request in message_requests %}
+                                    <tr>
+                                        <td>{{ request.patient.email }}</td>
+                                        <td>{{ request.created_at|date:"Y-m-d H:i" }}</td>
+                                        <td>{{ request.status }}</td>
+                                        <td>
+                                            <a href="{% url 'core:respond_message_request' message_request_id=request.id %}" class="btn btn-primary btn-sm">Respond</a>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <p class="no-requests">You have no pending message requests.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    <div class="col-12 col-md-6 col-lg-4 col-xl-4">
+        <div class="card member-panel">
+            <div class="card-header bg-white">
+                <h4 class="card-title mb-0">Patients</h4>
+            </div>
+            <div class="card-body">
+                <ul class="contact-list">
+                    {% for patient in patients %}
+                        <li>
+                            <div class="contact-cont">
+                                <div class="float-left user-img m-r-10">
+                                    <a href="{% url 'core:patient_detail' patient_id=patient.id %}" title="{{ patient.email }}"><img src="{% static 'assets/img/user.jpg' %}" alt="" class="w-40 rounded-circle"><span class="status online"></span></a>
+                                </div>
+                                <div class="contact-info">
+                                    <span class="contact-name text-ellipsis">{{ patient.email }}</span>
+                                    <span class="contact-date">Patient</span>
+                                </div>
+                            </div>
+                        </li>
+                    {% empty %}
+                        <li>
+                            <div class="contact-cont">
+                                <div class="contact-info">
+                                    <span class="contact-name text-ellipsis">No patients found.</span>
+                                </div>
+                            </div>
+                        </li>
+                    {% endfor %}
+                </ul>
+            </div>
+            <div class="card-footer text-center bg-white">
+                <a href="{% url 'core:patient_list' %}" class="text-muted">View all Patients</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block extra_js %}
+    <!-- Placeholder for Chart.js initialization if needed -->
+    <script>
+        // Initialize charts or other JS as needed
+        $(document).ready(function() {
+            // Example: Initialize sidebar toggle (handled by app.js)
+        });
+    </script>
+{% endblock %}

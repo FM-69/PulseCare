@@ -1,0 +1,190 @@
+{% extends 'patient_base.html' %}
+{% load static %}
+
+{% block title %}Schedule Appointment{% endblock %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/custom.css' %}">
+    <style>
+        .time-slot-btn {
+            margin: 8px;
+            padding: 12px 24px;
+            font-size: 16px;
+            border-radius: 8px;
+            border: 2px solid #007bff;
+            background-color: #fff;
+            color: #007bff;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            min-width: 120px;
+            text-align: center;
+        }
+        .time-slot-btn:hover {
+            background-color: #007bff;
+            color: #fff;
+        }
+        .time-slot-btn.selected {
+            background-color: #007bff;
+            color: #fff;
+            font-weight: bold;
+            position: relative;
+        }
+        .time-slot-btn.selected::after {
+            content: '\f00c';
+            font-family: 'FontAwesome';
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+        .time-slots-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        .loading {
+            color: #666;
+            font-style: italic;
+        }
+        .no-slots {
+            color: #dc3545;
+            font-style: italic;
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+<div class="content container-fluid">
+    <div class="row">
+        <div class="col-sm-12">
+            <h4 class="page-title">Schedule Appointment with {{ doctor.full_name }}</h4>
+        </div>
+    </div>
+    <div class="card-box">
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                        <span aria-hidden="true">×</span>
+                    </button>
+                </div>
+            {% endfor %}
+        {% endif %}
+        <div class="row">
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label for="appointment-type">Appointment Type</label>
+                    <select name="appointment_type" id="appointment-type" class="form-control" required>
+                        {% for value, label in form.appointment_type.field.choices %}
+                            <option value="{{ value }}" {% if form.appointment_type.value == value %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="appointment-date">Date</label>
+                    <input type="date" name="date" id="appointment-date" class="form-control" value="{{ form.date.value|date:'Y-m-d' }}" required>
+                </div>
+                <div class="form-group">
+                    <label>Available Times</label>
+                    <input type="hidden" name="time" id="appointment-time" value="" required>
+                    <div class="time-slots-container" id="time-slots">
+                        <p class="loading">Loading available times...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-12 text-right">
+                <button type="button" class="btn btn-primary" id="proceed-to-payment" disabled>Proceed to Payment</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Pass doctor ID safely for JS -->
+{{ doctor.id|json_script:"doctor-id" }}
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    $(document).ready(function() {
+        let selectedTime = null;
+
+        function updateTimeSlots() {
+            const appointmentType = $('#appointment-type').val();
+            const date = $('#appointment-date').val();
+            const doctorId = JSON.parse(document.getElementById('doctor-id').textContent);
+            const timeSlotsContainer = $('#time-slots');
+            const proceedBtn = $('#proceed-to-payment');
+
+            timeSlotsContainer.html('<p class="loading">Loading available times...</p>');
+            proceedBtn.prop('disabled', true);
+            selectedTime = null;
+            $('#appointment-time').val('');
+
+            if (appointmentType && date) {
+                const url = `/doctors/${doctorId}/schedule/`;
+                $.ajax({
+                    url: url,
+                    method: "GET",
+                    data: {
+                        appointment_type: appointmentType,
+                        date: date,
+                        ajax: true,
+                    },
+                    success: function(data) {
+                        timeSlotsContainer.empty();
+                        if (data.time_slots && data.time_slots.length > 0) {
+                            data.time_slots.forEach(function(slot) {
+                                const button = $('<button>')
+                                    .addClass('time-slot-btn')
+                                    .text(slot.display)
+                                    .data('time', slot.value)
+                                    .on('click', function() {
+                                        $('.time-slot-btn').removeClass('selected');
+                                        $(this).addClass('selected');
+                                        selectedTime = $(this).data('time');
+                                        $('#appointment-time').val(selectedTime);
+                                        proceedBtn.prop('disabled', false);
+                                    });
+                                timeSlotsContainer.append(button);
+                            });
+                        } else {
+                            timeSlotsContainer.append('<p class="no-slots">No available slots for this date and appointment type.</p>');
+                            proceedBtn.prop('disabled', true);
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        console.error('Error loading time slots:', status, error);
+                        timeSlotsContainer.empty().append('<p class="no-slots">Error loading available times. Please try again.</p>');
+                        proceedBtn.prop('disabled', true);
+                    },
+                });
+            } else {
+                timeSlotsContainer.empty().append('<p class="no-slots">Please select an appointment type and date.</p>');
+                proceedBtn.prop('disabled', true);
+            }
+        }
+
+        $('#proceed-to-payment').on('click', function() {
+            const appointmentType = $('#appointment-type').val();
+            const date = $('#appointment-date').val();
+            const time = $('#appointment-time').val();
+            const doctorId = JSON.parse(document.getElementById('doctor-id').textContent);
+
+            if (appointmentType && date && time) {
+                const paymentUrl = `/payment/?doctor_id=${doctorId}&appointment_type=${appointmentType}&date=${date}&time=${time}`;
+                window.location.href = paymentUrl;
+            } else {
+                alert('Please select an appointment type, date, and time before proceeding to payment.');
+            }
+        });
+
+        $('#appointment-type, #appointment-date').on('change', updateTimeSlots);
+        updateTimeSlots();
+    });
+</script>
+{% endblock %}

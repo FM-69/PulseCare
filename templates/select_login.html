@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Select Login Role{% endblock title %}
+
+{% block stylesheet %}
+
+{% endblock stylesheet %}
+
+{% block content %}
+<div class="container">
+    <h1 class="text-center mb-4"><strong>Doctor or Patient?</strong></h1>
+    <div class="row justify-content-center">
+        <div class="col-md-6 col-lg-4 mb-3">
+          <div class="card">
+            <div class="card-body">
+              <h5 class="card-title">Doctor</h5>
+              <p class="card-text">If you are a doctor, click below to access your account.</p>
+              <div class="get-quote">
+                <a href="{% url 'core:doctor_login' %}" class="btn">Login as a Doctor</a>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-6 col-lg-4">
+          <div class="card">
+            <div class="card-body">
+              <h5 class="card-title">Patient</h5>
+              <p class="card-text">If you are a patient, click here to access your account.</p>
+                <div class="get-quote">
+                    <a href="{% url 'core:patient_login' %}" class="btn">Login as a Patient</a>
+                </div>
+            </div>
+          </div>
+        </div>
+    </div>
+</div>
+{% endblock content %}
+
+{% block javascript %}
+<!-- No additional JavaScript needed for this page -->
+{% endblock %}

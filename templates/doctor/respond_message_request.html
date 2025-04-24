@@ -1,0 +1,66 @@
+{% extends 'doctor_base.html' %}
+{% load static %}
+
+{% block title %}Respond to Message Request{% endblock %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/custom.css' %}">
+    <style>
+        .request-details {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        .request-details h5 {
+            margin-bottom: 15px;
+        }
+        .request-details p {
+            margin-bottom: 10px;
+        }
+        .action-buttons {
+            margin-top: 20px;
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+<div class="content container-fluid">
+    <div class="row">
+        <div class="col-sm-12">
+            <h4 class="page-title">Respond to Message Request</h4>
+        </div>
+    </div>
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">×</span>
+                </button>
+            </div>
+        {% endfor %}
+    {% endif %}
+    <div class="row">
+        <div class="col-md-6 offset-md-3">
+            <div class="request-details card-box">
+                <h5>Message Request Details</h5>
+                <p><strong>From Patient:</strong> {{ patient.email }}</p>
+                <p><strong>Request Sent At:</strong> {{ message_request.created_at|date:"Y-m-d H:i" }}</p>
+                <p><strong>Status:</strong> {{ message_request.status }}</p>
+                <div class="action-buttons text-center">
+                    <form action="{% url 'core:respond_message_request' message_request_id=message_request.id %}" method="post">
+                        {% csrf_token %}
+                        <input type="hidden" name="message_request_id" value="{{ message_request.id }}">
+                        <button type="submit" name="action" value="accept" class="btn btn-success mr-2">Accept</button>
+                        <button type="submit" name="action" value="reject" class="btn btn-danger">Reject</button>
+                    </form>
+                </div>
+            </div>
+            <div class="text-center">
+                <a href="{% url 'core:doctor_dashboard' %}" class="btn btn-secondary">Back to Dashboard</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

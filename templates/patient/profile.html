@@ -1,0 +1,58 @@
+{% extends 'patient_base.html' %}
+{% load static %}
+
+{% block title %}Patient Profile{% endblock %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/custom.css' %}">
+    <style>
+        .profile-card {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        .profile-img {
+            width: 150px;
+            height: 150px;
+            object-fit: cover;
+            border-radius: 50%;
+        }
+        .profile-info p {
+            font-size: 16px;
+            margin-bottom: 10px;
+        }
+        .edit-btn {
+            margin-top: 20px;
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+<div class="content container-fluid">
+    <div class="row">
+        <div class="col-sm-12">
+            <h4 class="page-title">My Profile</h4>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card-box profile-card">
+                <div class="text-center">
+                    <img src="{% if patient.photo %}{{ patient.photo.url }}{% else %}{% static 'assets/img/user.jpg' %}{% endif %}" alt="{{ patient.full_name }}" class="profile-img mb-3">
+                    <h4>{{ patient.full_name }}</h4>
+                </div>
+                <div class="profile-info mt-4">
+                    <p><strong>Email:</strong> {{ patient.email }}</p>
+                    <p><strong>Phone Number:</strong> {{ patient.number|default:"Not provided" }}</p>
+                    <p><strong>Gender:</strong> {{ patient.gender }}</p>
+                    <p><strong>Date of Birth:</strong> {{ patient.dob|date:"Y-m-d" }}</p>
+                    <p><strong>Address:</strong> {{ patient.address|default:"Not provided" }}</p>
+                    <p><strong>Joined:</strong> {{ patient.created_at|date:"Y-m-d H:i" }}</p>
+                </div>
+                <div class="get-quote text-center">
+                    <a href="{% url 'core:patient_edit_profile' %}" class="btn">Edit Profile</a>
+                  </div>    
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

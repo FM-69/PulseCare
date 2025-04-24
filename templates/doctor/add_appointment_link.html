@@ -1,0 +1,37 @@
+{% extends 'doctor_base.html' %}
+{% load static %}
+
+{% block title %}Add Consultation Link{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-12">
+        <h4 class="mb-4">Add Consultation Link for Appointment</h4>
+    </div>
+</div>
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h4 class="card-title d-inline-block">Appointment with {{ appointment.patient.email }} on {{ appointment.date }} at {{ appointment.time }}</h4>
+                <a href="{% url 'core:doctor_appointments' %}" class="btn btn-secondary float-right">Back to Appointments</a>
+            </div>
+            <div class="card-body">
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <label for="id_consultation_link">Consultation Link</label>
+                        {{ form.consultation_link }}
+                        {% if form.consultation_link.errors %}
+                            <div class="text-danger">
+                                {{ form.consultation_link.errors }}
+                            </div>
+                        {% endif %}
+                    </div>
+                    <button type="submit" class="btn btn-primary">Add Link</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
