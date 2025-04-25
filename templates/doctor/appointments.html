@@ -51,6 +51,14 @@
                                             {% else %}
                                                 <a href="{% url 'core:add_appointment_link' appointment_id=appointment.id %}" class="btn btn-success btn-sm">Add Link</a>
                                             {% endif %}
+                                            {% if not appointment.prescription %}
+                                                <a href="{% url 'core:add_prescription' appointment_id=appointment.id %}" class="btn btn-info btn-sm">Add Prescription</a>
+                                            {% else %}
+                                                <form method="post" action="{% url 'core:finish_appointment' appointment_id=appointment.id %}" style="display:inline;">
+                                                    {% csrf_token %}
+                                                    <button type="submit" class="btn btn-danger btn-sm">Finish Appointment</button>
+                                                </form>
+                                            {% endif %}
                                         </td>
                                     </tr>
                                 {% endfor %}

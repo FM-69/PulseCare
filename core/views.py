@@ -38,6 +38,128 @@ def message_request(request):
     return render(request, "doctor/respond_message_request.html")
 
 
+#Prescription
+class PrescriptionForm(forms.ModelForm):
+    class Meta:
+        model = Prescription
+        fields = ['prescription_text', 'recommended_tests']
+        widgets = {
+            'prescription_text': forms.Textarea(attrs={'class': 'form-control', 'rows': 5, 'placeholder': 'Enter prescription details'}),
+            'recommended_tests': forms.Textarea(attrs={'class': 'form-control', 'rows': 3, 'placeholder': 'Enter recommended tests (optional)'}),
+        }
+
+class AddPrescriptionView(View):
+    def get(self, request, appointment_id):
+        if not hasattr(request.user, 'doctor'):
+            messages.error(request, "You are not authorized to access this page.")
+            return redirect('core:index')
+
+        appointment = get_object_or_404(Appointment, id=appointment_id, doctor=request.user.doctor)
+        if hasattr(appointment, 'prescription'):
+            messages.error(request, "A prescription has already been added for this appointment.")
+            return redirect('core:doctor_appointments')
+
+        form = PrescriptionForm()
+        context = {
+            'form': form,
+            'appointment': appointment,
+        }
+        return render(request, 'doctor/add_prescription.html', context)
+
+    def post(self, request, appointment_id):
+        if not hasattr(request.user, 'doctor'):
+            messages.error(request, "You are not authorized to access this page.")
+            return redirect('core:index')
+
+        appointment = get_object_or_404(Appointment, id=appointment_id, doctor=request.user.doctor)
+        if hasattr(appointment, 'prescription'):
+            messages.error(request, "A prescription has already been added for this appointment.")
+            return redirect('core:doctor_appointments')
+
+        form = PrescriptionForm(request.POST)
+        if form.is_valid():
+            prescription = form.save(commit=False)
+            prescription.appointment = appointment
+            prescription.save()
+            messages.success(request, "Prescription added successfully.")
+            return redirect('core:doctor_appointments')
+        context = {
+            'form': form,
+            'appointment': appointment,
+        }
+        return render(request, 'doctor/add_prescription.html', context)
+    
+class FinishAppointmentView(View):
+    def post(self, request, appointment_id):
+        # Check if the user is the doctor or patient of the appointment
+        appointment = get_object_or_404(Appointment, id=appointment_id)
+        if not (hasattr(request.user, 'doctor') and request.user.doctor == appointment.doctor) and not (request.user == appointment.patient):
+            messages.error(request, "You are not authorized to finish this appointment.")
+            return redirect('core:index')
+
+        # For doctors, ensure a prescription exists before finishing
+        if hasattr(request.user, 'doctor'):
+            if not hasattr(appointment, 'prescription'):
+                messages.error(request, "You must add a prescription before finishing the appointment.")
+                return redirect('core:doctor_appointments')
+
+        # Create a ServiceProvided record
+        service = ServiceProvided(
+            patient=appointment.patient,
+            doctor=appointment.doctor,
+            appointment_type=appointment.appointment_type,
+            date=appointment.date,
+            time=appointment.time,
+            prescription_text=appointment.prescription.prescription_text,
+            recommended_tests=appointment.prescription.recommended_tests if appointment.prescription.recommended_tests else '',
+            consultation_link=appointment.consultation_link if appointment.consultation_link else ''
+        )
+        service.save()
+
+        # Delete the appointment (this will also delete the prescription due to CASCADE)
+        appointment.delete()
+
+        messages.success(request, "Appointment finished successfully.")
+        if hasattr(request.user, 'doctor'):
+            return redirect('core:doctor_appointments')
+        return redirect('core:patient_dashboard')
+    
+class ServiceProvidedView(View):
+    def get(self, request):
+        if not request.user.is_authenticated:
+            messages.error(request, "You are not authorized to access this page.")
+            return redirect('core:index')
+
+        if hasattr(request.user, 'doctor'):
+            services = ServiceProvided.objects.filter(doctor=request.user.doctor).order_by('-completed_at')
+            template = 'doctor/service_provided.html'
+        else:
+            services = ServiceProvided.objects.filter(patient=request.user).order_by('-completed_at')
+            template = 'patient/service_provided.html'
+
+        context = {
+            'services': services,
+        }
+        return render(request, template, context)
+
+class SubmitReviewView(View):
+    def post(self, request, service_id):
+        if request.user.profile.role != 'PATIENT':
+            messages.error(request, "You are not authorized to submit a review.")
+            return redirect('core:index')
+
+        service = get_object_or_404(ServiceProvided, id=service_id, patient=request.user)
+        rating = request.POST.get('rating')
+        review = request.POST.get('review')
+
+        if rating and rating in [str(i) for i in range(1, 6)]:
+            service.rating = int(rating)
+        service.review = review
+        service.save()
+
+        messages.success(request, "Review submitted successfully.")
+        return redirect('core:service_provided')
+
 # Form for adding/editing the consultation link
 class ConsultationLinkForm(forms.ModelForm):
     class Meta:
@@ -51,7 +173,7 @@ class AddAppointmentLinkView(View):
     def get(self, request, appointment_id):
         if not hasattr(request.user, 'doctor'):
             messages.error(request, "You are not authorized to access this page.")
-            return redirect('core:home')
+            return redirect('core:index')
 
         appointment = get_object_or_404(Appointment, id=appointment_id, doctor=request.user.doctor)
         form = ConsultationLinkForm()
@@ -64,7 +186,7 @@ class AddAppointmentLinkView(View):
     def post(self, request, appointment_id):
         if not hasattr(request.user, 'doctor'):
             messages.error(request, "You are not authorized to access this page.")
-            return redirect('core:home')
+            return redirect('core:index')
 
         appointment = get_object_or_404(Appointment, id=appointment_id, doctor=request.user.doctor)
         form = ConsultationLinkForm(request.POST, instance=appointment)
@@ -82,7 +204,7 @@ class EditAppointmentLinkView(View):
     def get(self, request, appointment_id):
         if not hasattr(request.user, 'doctor'):
             messages.error(request, "You are not authorized to access this page.")
-            return redirect('core:home')
+            return redirect('core:index')
 
         appointment = get_object_or_404(Appointment, id=appointment_id, doctor=request.user.doctor)
         form = ConsultationLinkForm(instance=appointment)
@@ -95,7 +217,7 @@ class EditAppointmentLinkView(View):
     def post(self, request, appointment_id):
         if not hasattr(request.user, 'doctor'):
             messages.error(request, "You are not authorized to access this page.")
-            return redirect('core:home')
+            return redirect('core:index')
 
         appointment = get_object_or_404(Appointment, id=appointment_id, doctor=request.user.doctor)
         form = ConsultationLinkForm(request.POST, instance=appointment)
@@ -204,7 +326,7 @@ class PatientDashboardView(View):
     def get(self, request):
         if not request.user.is_authenticated or request.user.profile.role != 'PATIENT':
             messages.error(request, "You are not authorized to access this page.")
-            return redirect('core:home')
+            return redirect('core:index')
 
         # Fetch appointments for the patient
         appointments = Appointment.objects.filter(patient=request.user).select_related('doctor').order_by('-date', '-time')
@@ -236,7 +358,7 @@ class DoctorDashboardView(View):
     def get(self, request):
         if not hasattr(request.user, 'doctor'):
             messages.error(request, "You are not authorized to access this page.")
-            return redirect('core:home')
+            return redirect('core:index')
 
         doctor = request.user.doctor
         # Fetch pending message requests
@@ -263,7 +385,7 @@ class DoctorPatientListView(View):
     def get(self, request):
         if not hasattr(request.user, 'doctor'):
             messages.error(request, "You are not authorized to access this page.")
-            return redirect('core:home')
+            return redirect('core:index')
 
         doctor = request.user.doctor
         appointments = Appointment.objects.filter(doctor=doctor).select_related('patient').distinct()
@@ -448,7 +570,7 @@ class DoctorAppointmentsView(View):
     def get(self, request):
         if not hasattr(request.user, 'doctor'):
             messages.error(request, "You are not authorized to access this page.")
-            return redirect('core:home')
+            return redirect('core:index')
 
         doctor = request.user.doctor
         appointments = Appointment.objects.filter(doctor=doctor).select_related('patient').order_by('-date', '-time')
@@ -462,7 +584,7 @@ class DoctorPaymentsView(View):
     def get(self, request):
         if not hasattr(request.user, 'doctor'):
             messages.error(request, "You are not authorized to access this page.")
-            return redirect('core:home')
+            return redirect('core:index')
 
         doctor = request.user.doctor
         payments = Payment.objects.filter(appointment__doctor=doctor).select_related('patient', 'appointment').order_by('-payment_date')
@@ -494,7 +616,7 @@ class PatientDetailView(View):
     def get(self, request, patient_id):
         if not hasattr(request.user, 'doctor'):
             messages.error(request, "You are not authorized to access this page.")
-            return redirect('core:home')
+            return redirect('core:index')
 
         patient = get_object_or_404(User, id=patient_id, profile__role='PATIENT')
         # Optionally, you can check if the patient has an appointment with the doctor
@@ -979,7 +1101,7 @@ class ChatView(View):
             (hasattr(request.user, 'doctor') and request.user.doctor == message_request.doctor)
         ):
             messages.error(request, "You are not authorized to access this chat.")
-            return redirect('core:home')
+            return redirect('core:index')
 
         messages = ChatMessage.objects.filter(message_request=message_request).order_by('timestamp')
 
@@ -1000,7 +1122,7 @@ class ChatView(View):
             (hasattr(request.user, 'doctor') and request.user.doctor == message_request.doctor)
         ):
             messages.error(request, "You are not authorized to access this chat.")
-            return redirect('core:home')
+            return redirect('core:index')
 
         message_content = request.POST.get('message')
         if not message_content:

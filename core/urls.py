@@ -63,4 +63,10 @@ urlpatterns = [
 
     path('doctor/appointment/<int:appointment_id>/add-link/', views.AddAppointmentLinkView.as_view(), name='add_appointment_link'),
     path('doctor/appointment/<int:appointment_id>/edit-link/', views.   EditAppointmentLinkView.as_view(), name='edit_appointment_link'),
+
+    path('doctor/appointment/<int:appointment_id>/add-prescription/', views.AddPrescriptionView.as_view(), name='add_prescription'),
+    path('appointment/<int:appointment_id>/finish/', views.FinishAppointmentView.as_view(), name='finish_appointment'),
+    path('service-provided/', views.ServiceProvidedView.as_view(), name='service_provided'),
+    path('service/<int:service_id>/submit-review/', views.SubmitReviewView.as_view(), name='submit_review'),
+
 ]

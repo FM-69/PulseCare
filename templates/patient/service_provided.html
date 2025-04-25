@@ -1,0 +1,87 @@
+{% extends 'patient_base.html' %}
+{% load static %}
+
+{% block title %}Service Provided{% endblock %}
+
+{% block content %}
+<div class="content container-fluid">
+    <div class="row">
+        <div class="col-sm-12">
+            <h4 class="page-title">Service Provided</h4>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-12">
+            <div class="card-box">
+                <h5>Completed Appointments</h5>
+                {% if services %}
+                    <div class="table-responsive">
+                        <table class="table table-bordered">
+                            <thead>
+                                <tr>
+                                    <th>Doctor</th>
+                                    <th>Date</th>
+                                    <th>Time</th>
+                                    <th>Appointment Type</th>
+                                    <th>Prescription</th>
+                                    <th>Recommended Tests</th>
+                                    <th>Consultation Link</th>
+                                    <th>Rating/Review</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for service in services %}
+                                    <tr>
+                                        <td>{{ service.doctor.full_name }}</td>
+                                        <td>{{ service.date|date:"Y-m-d" }}</td>
+                                        <td>{{ service.time }}</td>
+                                        <td>{{ service.appointment_type }}</td>
+                                        <td>{{ service.prescription_text }}</td>
+                                        <td>{{ service.recommended_tests|default:"None" }}</td>
+                                        <td>
+                                            {% if service.consultation_link %}
+                                                <a href="{{ service.consultation_link }}" target="_blank">Join Meeting</a>
+                                            {% else %}
+                                                <span class="text-muted">No link</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if service.rating %}
+                                                <p>Rating: {{ service.rating }} / 5</p>
+                                                <p>Review: {{ service.review|default:"No review" }}</p>
+                                            {% else %}
+                                                <form method="post" action="{% url 'core:submit_review' service_id=service.id %}">
+                                                    {% csrf_token %}
+                                                    <div class="form-group">
+                                                        <label>Rating (1-5):</label>
+                                                        <select name="rating" class="form-control" required>
+                                                            <option value="" disabled selected>Select rating</option>
+                                                            {% for i in "12345" %}
+                                                                <option value="{{ i }}">{{ i }}</option>
+                                                            {% endfor %}
+                                                        </select>
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <label>Review (Optional):</label>
+                                                        <textarea name="review" class="form-control" rows="3" placeholder="Write your review"></textarea>
+                                                    </div>
+                                                    <button type="submit" class="btn btn-primary btn-sm">Submit Review</button>
+                                                </form>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <p>No completed appointments found.</p>
+                {% endif %}
+                <div class="get-quote text-right">
+                    <a href="{% url 'core:patient_dashboard' %}" class="btn btn-secondary">Back to Dashboard</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

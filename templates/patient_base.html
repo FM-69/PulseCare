@@ -93,7 +93,10 @@
                                     <ul class="nav menu">
                                         <li class="active"><a href="{% url 'core:patient_home' %}">Home</a></li>
                                         <li><a href="{% url 'core:doctors_list' %}">Doctors</a></li>
-                                        <li><a href="{% url 'core:product_list' %}">Services</a></li>
+                                        <li>
+                                            <a href="{% url 'core:service_provided' %}"><i class="fa fa-check-circle"></i> <span>Service Provided</span></a>
+                                        </li>
+                                        <li><a href="{% url 'core:product_list' %}">Tests and Medicines</a></li>
                                         
                                         {% if user.is_authenticated %}
                                         <li class="nav-item">

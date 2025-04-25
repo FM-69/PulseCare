@@ -1,0 +1,66 @@
+{% extends 'doctor_base.html' %}
+{% load static %}
+
+{% block title %}Service Provided{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-12">
+        <h4 class="mb-4">Service Provided</h4>
+    </div>
+</div>
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h4 class="card-title d-inline-block">Completed Appointments</h4>
+                <a href="{% url 'core:doctor_appointments' %}" class="btn btn-secondary float-right">Back to Appointments</a>
+            </div>
+            <div class="card-body">
+                {% if services %}
+                    <div class="table-responsive">
+                        <table class="table table-bordered">
+                            <thead>
+                                <tr>
+                                    <th>Patient Email</th>
+                                    <th>Date</th>
+                                    <th>Time</th>
+                                    <th>Appointment Type</th>
+                                    <th>Prescription</th>
+                                    <th>Recommended Tests</th>
+                                    <th>Consultation Link</th>
+                                    <th>Rating</th>
+                                    <th>Review</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for service in services %}
+                                    <tr>
+                                        <td>{{ service.patient.email }}</td>
+                                        <td>{{ service.date|date:"Y-m-d" }}</td>
+                                        <td>{{ service.time }}</td>
+                                        <td>{{ service.appointment_type }}</td>
+                                        <td>{{ service.prescription_text }}</td>
+                                        <td>{{ service.recommended_tests|default:"None" }}</td>
+                                        <td>
+                                            {% if service.consultation_link %}
+                                                <a href="{{ service.consultation_link }}" target="_blank">Join Meeting</a>
+                                            {% else %}
+                                                <span class="text-muted">No link</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>{{ service.rating|default:"Not rated" }}</td>
+                                        <td>{{ service.review|default:"No review" }}</td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <p>No completed appointments found.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

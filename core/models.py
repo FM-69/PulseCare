@@ -185,11 +185,10 @@ class Appointment(models.Model):
     time = models.TimeField()
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    consultation_link = models.URLField(max_length=255, blank=True, null=True)  # Add this field
+    consultation_link = models.URLField(max_length=255, blank=True, null=True)
 
     def __str__(self):
-        return f"{self.patient.username} with {self.doctor.full_name} on {self.date} at {self.time} ({self.appointment_type})"   
-
+        return f"{self.patient.username} with {self.doctor.full_name} on {self.date} at {self.time} ({self.appointment_type})"
 class Payment(models.Model):
     patient = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='payments')
     appointment = models.OneToOneField(Appointment, on_delete=models.CASCADE, related_name='payment')
@@ -304,3 +303,30 @@ class ChatMessage(models.Model):
 
     def __str__(self):
         return f"Message from {self.sender.email} at {self.timestamp}"
+    
+
+class Prescription(models.Model):
+    appointment = models.OneToOneField(Appointment, on_delete=models.CASCADE, related_name='prescription')
+    prescription_text = models.TextField()
+    recommended_tests = models.TextField(blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Prescription for {self.appointment}"
+    
+
+class ServiceProvided(models.Model):
+    patient = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='services_received')
+    doctor = models.ForeignKey(Doctor, on_delete=models.CASCADE, related_name='services_provided')
+    appointment_type = models.CharField(max_length=20)
+    date = models.DateField()
+    time = models.TimeField()
+    prescription_text = models.TextField()
+    recommended_tests = models.TextField(blank=True, null=True)
+    consultation_link = models.URLField(max_length=255, blank=True, null=True)
+    rating = models.IntegerField(choices=[(i, str(i)) for i in range(1, 6)], null=True, blank=True)  # 1 to 5 stars
+    review = models.TextField(blank=True, null=True)
+    completed_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Service for {self.patient.username} by {self.doctor.full_name} on {self.date} at {self.time}"
