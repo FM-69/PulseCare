@@ -90,40 +90,23 @@
                             <!-- Main Menu -->
                             <div class="main-menu">
                                 <nav class="navigation">
-                                    <ul class="nav menu">
-                                        <li class="active"><a href="{% url 'core:patient_home' %}">Home</a></li>
-                                        <li><a href="{% url 'core:doctors_list' %}">Doctors</a></li>
-                                        <li>
-                                            <a href="{% url 'core:service_provided' %}"><i class="fa fa-check-circle"></i> <span>Service Provided</span></a>
-                                        </li>
-                                        <li><a href="{% url 'core:product_list' %}">Tests and Medicines</a></li>
-                                        
+                                    <ul class="nav menu" style="display: flex; flex-wrap: nowrap; list-style: none; padding: 0; margin: 0;">
+                                        <li style="margin-right: 15px;"><a href="{% url 'core:patient_home' %}" {% if request.resolver_match.url_name == 'patient_home' %}class="active"{% endif %}>Home</a></li>
+                                        <li style="margin-right: 15px;"><a href="{% url 'core:doctors_list' %}">Doctors</a></li>
+                                        <li style="margin-right: 15px;"><a href="{% url 'core:service_provided' %}"></i> Service Provided</a></li>
+                                        <li style="margin-right: 15px;"><a href="{% url 'core:product_list' %}">Tests and Medicines</a></li>
                                         {% if user.is_authenticated %}
-                                        <li class="nav-item">
                                             {% if user.profile.role == 'PATIENT' %}
-                                                <a class="nav-link" href="{% url 'core:patient_dashboard' %}">Dashboard</a>
-                                                <li><a href="{% url 'core:patient_profile' %}">Profile</a></li>
+                                                <li style="margin-right: 15px;"><a href="{% url 'core:patient_dashboard' %}">Dashboard</a></li>
+                                                <li style="margin-right: 15px;"><a href="{% url 'core:patient_profile' %}">Profile</a></li>
                                             {% endif %}
-                                        </li>
-                                        <li class="nav-item">
-                                            <a class="nav-link" href="{% url 'core:logout' %}">Logout</a>
-                                        </li>
-                                    {% else %}
-                                    <li class="dropdown">
-                                        <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Login <span class="caret"></span></a>
-                                        <ul class="dropdown-menu">
-                                            <li><a class="dropdown-item" href="{% url 'core:patient_login' %}">Patient</a></li>
-                                            <li><a class="dropdown-item" href="{% url 'core:doctor_login' %}">Doctor</a></li>
-                                        </ul>
-                                    </li>
-                                    <li class="dropdown">
-                                        <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Signup <span class="caret"></span></a>
-                                        <ul class="dropdown-menu">
-                                            <li><a class="dropdown-item" href="{% url 'core:patient_signup' %}">As a Patient</a></li>
-                                            <li><a class="dropdown-item" href="{% url 'core:doctor_signup' %}">As a Doctor</a></li>
-                                        </ul>
-                                    </li>
-                                    {% endif %}
+                                            <li style="margin-right: 15px;"><a href="{% url 'core:logout' %}">Logout</a></li>
+                                        {% else %}
+                                            <li style="margin-right: 15px;"><a href="{% url 'core:patient_login' %}">Patient Login</a></li>
+                                            <li style="margin-right: 15px;"><a href="{% url 'core:doctor_login' %}">Doctor Login</a></li>
+                                            <li style="margin-right: 15px;"><a href="{% url 'core:patient_signup' %}">Patient Signup</a></li>
+                                            <li style="margin-right: 15px;"><a href="{% url 'core:doctor_signup' %}">Doctor Signup</a></li>
+                                        {% endif %}
                                     </ul>
                                 </nav>
                             </div>
@@ -131,7 +114,7 @@
                         </div>
                         <div class="col-lg-2 col-12">
                             <div class="get-quote">
-                                <a href="#" class="btn">Book Appointment</a>
+                                <a href="{% url 'core:doctors_list' %}" class="btn">Book Appointment</a>
                             </div>
                         </div>
                     </div>

@@ -1,11 +1,35 @@
 {% extends 'doctor_base.html' %}
-{% load static crispy_forms_tags %}
+{% load static %}
+
 {% block title %}Edit Doctor Profile{% endblock %}
+
 {% block extra_css %}
     <link rel="stylesheet" href="{% static 'assets/css/select2.min.css' %}">
     <link rel="stylesheet" href="{% static 'assets/css/bootstrap-datetimepicker.min.css' %}">
     <link rel="stylesheet" href="{% static 'css/custom.css' %}">
+    <style>
+        .profile-img-wrap img {
+            object-fit: cover;
+        }
+        .select2-container .select2-selection--single {
+            height: 38px;
+            line-height: 38px;
+        }
+        .select2-container--default .select2-selection--single .select2-selection__arrow {
+            height: 38px;
+        }
+        .select2-container--default .select2-selection--single .select2-selection__rendered {
+            line-height: 38px;
+        }
+        .custom-file-label::after {
+            content: "Browse";
+        }
+        .custom-file-label.selected::after {
+            content: "Browse";
+        }
+    </style>
 {% endblock %}
+
 {% block content %}
 <div class="content container-fluid">
     <div class="row">
@@ -32,22 +56,28 @@
                     </div>
                 </div>
                 <div class="col-md-6 mb-3">
-                    {{ form.full_name|as_crispy_field }}
+                    <div class="form-group">
+                        <label class="focus-label">Full Name</label>
+                        {{ form.full_name }}
+                    </div>
                 </div>
                 <div class="col-md-6 mb-3">
-                    {{ form.designation|as_crispy_field }}
+                    <div class="form-group">
+                        <label class="focus-label">Designation</label>
+                        {{ form.designation }}
+                    </div>
                 </div>
                 <div class="col-md-6 mb-3">
-                    {{ form.specialty|as_crispy_field }}
+                    <div class="form-group">
+                        <label class="focus-label">Specialty</label>
+                        {{ form.specialty }}
+                    </div>
                 </div>
                 <div class="col-md-6 mb-3">
-                    {{ form.number|as_crispy_field }}
-                </div>
-                <div class="col-md-6 mb-3">
-                    {{ form.dob|as_crispy_field }}
-                </div>
-                <div class="col-md-6 mb-3">
-                    {{ form.gender|as_crispy_field }}
+                    <div class="form-group">
+                        <label class="focus-label">Phone Number</label>
+                        {{ form.number }}
+                    </div>
                 </div>
             </div>
         </div>
@@ -57,7 +87,7 @@
             <div class="row">
                 <div class="col-md-12 mb-3">
                     <div class="custom-file" style="max-width: 300px; margin: 0 auto;">
-                        <input type="file" class="custom-file-input" id="{{ form.photo.id_for_label }}" name="{{ form.photo.name }}" accept="image/*">
+                        {{ form.photo }}
                         <label class="custom-file-label" for="{{ form.photo.id_for_label }}">Choose New Photo</label>
                     </div>
                 </div>
@@ -68,13 +98,22 @@
             <h3 class="card-title">Contact Information</h3>
             <div class="row">
                 <div class="col-md-12 mb-3">
-                    {{ form.address|as_crispy_field }}
+                    <div class="form-group">
+                        <label class="focus-label">Address</label>
+                        {{ form.address }}
+                    </div>
                 </div>
                 <div class="col-md-6 mb-3">
-                    {{ form.consultation_fee|as_crispy_field }}
+                    <div class="form-group">
+                        <label class="focus-label">Consultation Fee</label>
+                        {{ form.consultation_fee }}
+                    </div>
                 </div>
                 <div class="col-md-6 mb-3">
-                    {{ form.certificate_url|as_crispy_field }}
+                    <div class="form-group">
+                        <label class="focus-label">Certificate URL</label>
+                        {{ form.certificate_url }}
+                    </div>
                 </div>
             </div>
         </div>
@@ -83,10 +122,16 @@
             <h3 class="card-title">Professional Information</h3>
             <div class="row">
                 <div class="col-md-12 mb-3">
-                    {{ form.qualification|as_crispy_field }}
+                    <div class="form-group">
+                        <label class="focus-label">Qualification</label>
+                        {{ form.qualification }}
+                    </div>
                 </div>
                 <div class="col-md-12 mb-3">
-                    {{ form.details|as_crispy_field }}
+                    <div class="form-group">
+                        <label class="focus-label">Details</label>
+                        {{ form.details }}
+                    </div>
                 </div>
             </div>
         </div>
@@ -95,51 +140,73 @@
             <h3 class="card-title">Experience Information</h3>
             {{ formset.management_form }}
             <div id="experience-accordion" class="accordion">
-                {% for form in formset %}
+                {% for exp_form in formset %}
                     <div class="experience-formset card mb-2">
-                        <div class="card-header" id="heading-{{ forloop.counter }}">
+                        <div class="card-header" id="heading-{{ forloop.counter0 }}">
                             <h5 class="mb-0">
-                                <button class="btn btn-link" type="button" data-toggle="collapse" data-target="#collapse-{{ forloop.counter }}" aria-expanded="{% if forloop.first %}true{% else %}false{% endif %}" aria-controls="collapse-{{ forloop.counter }}">
-                                    Experience {{ forloop.counter }}{% if form.instance.pk %} - {{ form.instance.medical_company }}{% endif %}
+                                <button class="btn btn-link" type="button" data-toggle="collapse" data-target="#collapse-{{ forloop.counter0 }}" aria-expanded="{% if forloop.first %}true{% else %}false{% endif %}" aria-controls="collapse-{{ forloop.counter0 }}">
+                                    Experience {{ forloop.counter }}{% if exp_form.instance.pk %} - {{ exp_form.instance.medical_company }}{% endif %}
                                 </button>
                             </h5>
                         </div>
-                        <div id="collapse-{{ forloop.counter }}" class="collapse {% if forloop.first %}show{% endif %}" aria-labelledby="heading-{{ forloop.counter }}" data-parent="#experience-accordion">
+                        <div id="collapse-{{ forloop.counter0 }}" class="collapse {% if forloop.first %}show{% endif %}" aria-labelledby="heading-{{ forloop.counter0 }}" data-parent="#experience-accordion">
                             <div class="card-body">
                                 <div class="row">
                                     <div class="col-md-6 mb-3">
-                                        {{ form.medical_company|as_crispy_field }}
+                                        <div class="form-group">
+                                            <label class="focus-label">Medical Company</label>
+                                            {{ exp_form.medical_company }}
+                                        </div>
                                     </div>
                                     <div class="col-md-6 mb-3">
-                                        {{ form.designation|as_crispy_field }}
+                                        <div class="form-group">
+                                            <label class="focus-label">Designation</label>
+                                            {{ exp_form.designation }}
+                                        </div>
                                     </div>
                                     <div class="col-md-6 mb-3">
-                                        {{ form.department|as_crispy_field }}
+                                        <div class="form-group">
+                                            <label class="focus-label">Department</label>
+                                            {{ exp_form.department }}
+                                        </div>
                                     </div>
                                     <div class="col-md-6 mb-3">
-                                        {{ form.employment_status|as_crispy_field }}
+                                        <div class="form-group">
+                                            <label class="focus-label">Employment Status</label>
+                                            {{ exp_form.employment_status }}
+                                        </div>
                                     </div>
                                     <div class="col-md-6 mb-3">
-                                        {{ form.start_date|as_crispy_field }}
+                                        <div class="form-group">
+                                            <label class="focus-label">Start Date</label>
+                                            {{ exp_form.start_date }}
+                                        </div>
                                     </div>
                                     <div class="col-md-6 mb-3">
-                                        {{ form.end_date|as_crispy_field }}
+                                        <div class="form-group">
+                                            <label class="focus-label">End Date</label>
+                                            {{ exp_form.end_date }}
+                                        </div>
                                     </div>
-                                    {% if form.instance.pk %}
+                                    {% if exp_form.instance.pk %}
                                         <div class="col-md-6 mb-3">
-                                            <label class="focus-label">Period</label>
-                                            <input type="text" class="form-control" value="{{ form.instance.period }}" readonly>
+                                            <div class="form-group">
+                                                <label class="focus-label">Period</label>
+                                                <input type="text" class="form-control" value="{{ exp_form.instance.period }}" readonly>
+                                            </div>
                                         </div>
                                         <div class="col-md-6 mb-3">
-                                            <label class="focus-label">Total Years</label>
-                                            <input type="text" class="form-control" value="{{ form.instance.total_years }}" readonly>
+                                            <div class="form-group">
+                                                <label class="focus-label">Total Years</label>
+                                                <input type="text" class="form-control" value="{{ exp_form.instance.total_years }}" readonly>
+                                            </div>
                                         </div>
                                     {% endif %}
                                     {% if formset.can_delete %}
                                         <div class="col-md-12 mb-3">
                                             <div class="form-check">
-                                                {{ form.DELETE }}
-                                                <label class="form-check-label" for="{{ form.DELETE.id_for_label }}">Delete this experience</label>
+                                                {{ exp_form.DELETE }}
+                                                <label class="form-check-label" for="{{ exp_form.DELETE.id_for_label }}">Delete this experience</label>
                                             </div>
                                         </div>
                                     {% endif %}
@@ -160,6 +227,7 @@
     </form>
 </div>
 {% endblock %}
+
 {% block extra_js %}
     <script src="{% static 'assets/js/select2.min.js' %}"></script>
     <script src="{% static 'assets/js/moment.min.js' %}"></script>
@@ -192,6 +260,10 @@
                 e.preventDefault();
                 var formsetPrefix = '{{ formset.prefix }}';
                 var formCount = parseInt($('#id_' + formsetPrefix + '-TOTAL_FORMS').val());
+                if (formCount >= 5) {
+                    alert('You cannot add more than 5 experiences.');
+                    return;
+                }
                 var newForm = $('.experience-formset:first').clone(true);
                 newForm.find(':input').each(function() {
                     var name = $(this).attr('name');
@@ -204,6 +276,8 @@
                             width: '100%',
                             dropdownCssClass: 'select2-dropdown-zindex'
                         });
+                    } else if ($(this).is('input[type="checkbox"]')) {
+                        $(this).prop('checked', false);
                     } else {
                         $(this).val('');
                     }
@@ -236,6 +310,7 @@
                     'id': 'collapse-' + formCount,
                     'aria-labelledby': 'heading-' + formCount
                 });
+                newForm.find('input[readonly]').closest('.form-group').remove();
                 newForm.insertBefore('.add-more');
                 $('#id_' + formsetPrefix + '-TOTAL_FORMS').val(formCount + 1);
             });

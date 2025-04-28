@@ -69,4 +69,9 @@ urlpatterns = [
     path('service-provided/', views.ServiceProvidedView.as_view(), name='service_provided'),
     path('service/<int:service_id>/submit-review/', views.SubmitReviewView.as_view(), name='submit_review'),
 
+    path('doctor/schedules/', views.DoctorSchedulesView.as_view(), name='doctor_schedules'),
+    path('doctor/schedule/<int:schedule_id>/edit/', views.EditDoctorScheduleView.as_view(), name='edit_doctor_schedule'),
+    path('doctor/schedule/<int:schedule_id>/delete/', views.DeleteDoctorScheduleView.as_view(), name='delete_doctor_schedule'),
+    # Other URL patterns...
+
 ]

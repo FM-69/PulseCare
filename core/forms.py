@@ -132,63 +132,60 @@ class DoctorLoginForm(forms.Form):
         "inactive": "This account is inactive.",
     }
 
-class DoctorEditProfileForm(forms.ModelForm):
-    gender = forms.ChoiceField(choices=Gender.choices, required=False)
-    dob = forms.DateField(widget=forms.TextInput(attrs={'class': 'form-control datetimepicker', 'autocomplete': 'off'}), required=False)
-    address = forms.CharField(widget=forms.Textarea(attrs={'rows': 4}), required=False)
-    consultation_fee = forms.DecimalField(widget=forms.NumberInput(attrs={'min': '0.01', 'step': '0.01'}))
+# class DoctorEditProfileForm(forms.ModelForm):
+#     class Meta:
+#         model = Doctor
+#         fields = [
+#             'full_name', 'designation', 'specialty', 'number',
+#             'dob', 'gender', 'address', 'consultation_fee',
+#             'certificate_url', 'qualification', 'details', 'photo'
+#         ]
+#         widgets = {
+#             'full_name': forms.TextInput(attrs={'class': 'form-control'}),
+#             'designation': forms.TextInput(attrs={'class': 'form-control'}),
+#             'specialty': forms.Select(attrs={'class': 'form-control select2'}),
+#             'number': forms.TextInput(attrs={'class': 'form-control'}),
+#             'dob': forms.DateInput(attrs={'class': 'form-control datetimepicker', 'autocomplete': 'off'}),
+#             'gender': forms.Select(attrs={'class': 'form-control'}),
+#             'address': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
+#             'consultation_fee': forms.NumberInput(attrs={'class': 'form-control', 'min': '1', 'step': '0.5'}),
+#             'certificate_url': forms.URLInput(attrs={'class': 'form-control'}),
+#             'qualification': forms.TextInput(attrs={'class': 'form-control'}),
+#             'details': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
+#             'photo': forms.FileInput(attrs={'class': 'custom-file-input', 'accept': 'image/*'}),
+#         }
 
-    class Meta:
-        model = Doctor
-        fields = [
-            'full_name', 'designation', 'specialty', 'number', 'address', 'details',
-            'qualification', 'consultation_fee', 'certificate_url', 'photo'
-        ]
-        widgets = {
-            'details': forms.Textarea(attrs={'rows': 2}),
-            'address': forms.Textarea(attrs={'rows': 2}),
-        }
+#     def clean_consultation_fee(self):
+#         consultation_fee = self.cleaned_data.get('consultation_fee')
+#         if consultation_fee is not None and consultation_fee <= 0:
+#             raise forms.ValidationError("Consultation fee must be greater than 0.")
+#         return consultation_fee
+    
+# class ExperienceForm(forms.ModelForm):
+#     start_date = forms.DateField(widget=forms.TextInput(attrs={'class': 'form-control datetimepicker', 'autocomplete': 'off'}))
+#     end_date = forms.DateField(widget=forms.TextInput(attrs={'class': 'form-control datetimepicker', 'autocomplete': 'off'}), required=False)
 
-    def clean_consultation_fee(self):
-        consultation_fee = self.cleaned_data.get("consultation_fee")
-        if consultation_fee <= 0:
-            raise ValidationError("Consultation fee must be greater than 0.")
-        return consultation_fee
+#     class Meta:
+#         model = Experience
+#         fields = ['medical_company', 'designation', 'department', 'employment_status', 'start_date', 'end_date']
 
-class ExperienceForm(forms.ModelForm):
-    start_date = forms.DateField(widget=forms.TextInput(attrs={'class': 'form-control datetimepicker', 'autocomplete': 'off'}))
-    end_date = forms.DateField(widget=forms.TextInput(attrs={'class': 'form-control datetimepicker', 'autocomplete': 'off'}), required=False)
+#     def clean_end_date(self):
+#         start_date = self.cleaned_data.get('start_date')
+#         end_date = self.cleaned_data.get('end_date')
 
-    class Meta:
-        model = Experience
-        fields = ['medical_company', 'designation', 'department', 'employment_status', 'start_date', 'end_date']
-
-    def clean(self):
-        cleaned_data = super().clean()
-        start_date = cleaned_data.get('start_date')
-        end_date = cleaned_data.get('end_date')
-
-        if start_date and end_date and end_date < start_date:
-            raise ValidationError("End date cannot be earlier than start date.")
-
-        if start_date:
-            end_date = end_date or datetime.now().date()
-            delta = (end_date - start_date).days / 365.25
-            cleaned_data['total_years'] = round(delta, 1)
-            cleaned_data['period'] = f"{start_date.strftime('%b %Y')} - {end_date.strftime('%b %Y') if end_date != datetime.now().date() else 'Present'}"
-        return cleaned_data
+#         if start_date and end_date and end_date < start_date:
+#             raise ValidationError("End date cannot be earlier than start date.")
+        
+#         return end_date
 
 # ExperienceFormSet = inlineformset_factory(
-#     Doctor, Experience, form=ExperienceForm, extra=1, can_delete=True
-# )    
-
-ExperienceFormSet = inlineformset_factory(
-    Doctor,
-    Experience,
-    fields=('medical_company', 'designation', 'department', 'employment_status', 'start_date', 'end_date'),
-    extra=1,
-    can_delete=True
-)
+#     Doctor,
+#     Experience,
+#     form=ExperienceForm,
+#     extra=1,
+#     max_num=5,
+#     can_delete=True
+# )
 
 class ScheduleAppointmentForm(forms.ModelForm):
     appointment_type = forms.ChoiceField(choices=AppointmentType.choices, widget=forms.Select(attrs={'id': 'appointment-type'}))

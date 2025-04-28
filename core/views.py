@@ -5,7 +5,7 @@ from django.views.generic import FormView, TemplateView
 from django.contrib.auth.views import LogoutView
 from django.urls import reverse_lazy
 from django.contrib.auth.mixins import LoginRequiredMixin
-from .forms import *
+from core.forms import *
 from django.views import View
 from .models import Specialty, Doctor, UserProfile, DoctorAvailability, Appointment
 import logging
@@ -103,6 +103,18 @@ class FinishAppointmentView(View):
                 messages.error(request, "You must add a prescription before finishing the appointment.")
                 return redirect('core:doctor_appointments')
 
+        # Check if a prescription exists before accessing its fields
+        try:
+            prescription = appointment.prescription
+            prescription_text = prescription.prescription_text
+            recommended_tests = prescription.recommended_tests if prescription.recommended_tests else ''
+        except Appointment.prescription.RelatedObjectDoesNotExist:
+            # If no prescription exists, show an error message
+            messages.error(request, "No prescription found for this appointment. A prescription is required to finish the appointment.")
+            if hasattr(request.user, 'doctor'):
+                return redirect('core:doctor_appointments')
+            return redirect('core:patient_dashboard')
+
         # Create a ServiceProvided record
         service = ServiceProvided(
             patient=appointment.patient,
@@ -110,8 +122,8 @@ class FinishAppointmentView(View):
             appointment_type=appointment.appointment_type,
             date=appointment.date,
             time=appointment.time,
-            prescription_text=appointment.prescription.prescription_text,
-            recommended_tests=appointment.prescription.recommended_tests if appointment.prescription.recommended_tests else '',
+            prescription_text=prescription_text,
+            recommended_tests=recommended_tests,
             consultation_link=appointment.consultation_link if appointment.consultation_link else ''
         )
         service.save()
@@ -123,7 +135,106 @@ class FinishAppointmentView(View):
         if hasattr(request.user, 'doctor'):
             return redirect('core:doctor_appointments')
         return redirect('core:patient_dashboard')
-    
+
+class DoctorScheduleForm(forms.ModelForm):
+    class Meta:
+        model = DoctorSchedule
+        fields = ['day_of_week', 'start_time', 'end_time', 'notes']
+        widgets = {
+            'day_of_week': forms.Select(attrs={'class': 'form-control'}),
+            'start_time': forms.TimeInput(attrs={'class': 'form-control', 'type': 'time'}),
+            'end_time': forms.TimeInput(attrs={'class': 'form-control', 'type': 'time'}),
+            'notes': forms.Textarea(attrs={'class': 'form-control', 'rows': 3, 'placeholder': 'Optional notes'}),
+        }
+
+    def clean(self):
+        cleaned_data = super().clean()
+        start_time = cleaned_data.get('start_time')
+        end_time = cleaned_data.get('end_time')
+        if start_time and end_time and start_time >= end_time:
+            raise forms.ValidationError("End time must be after start time.")
+        return cleaned_data
+
+class DoctorSchedulesView(View):
+    def get(self, request):
+        if not hasattr(request.user, 'doctor'):
+            messages.error(request, "You are not authorized to access this page.")
+            return redirect('core:home')
+
+        doctor = request.user.doctor
+        schedules = DoctorSchedule.objects.filter(doctor=doctor).order_by('day_of_week', 'start_time')
+        form = DoctorScheduleForm()
+        context = {
+            'schedules': schedules,
+            'form': form,
+        }
+        return render(request, 'doctor/schedules.html', context)
+
+    def post(self, request):
+        if not hasattr(request.user, 'doctor'):
+            messages.error(request, "You are not authorized to access this page.")
+            return redirect('core:home')
+
+        doctor = request.user.doctor
+        form = DoctorScheduleForm(request.POST)
+        if form.is_valid():
+            schedule = form.save(commit=False)
+            schedule.doctor = doctor
+            schedule.save()
+            messages.success(request, "Schedule added successfully.")
+            return redirect('core:doctor_schedules')
+
+        schedules = DoctorSchedule.objects.filter(doctor=doctor).order_by('day_of_week', 'start_time')
+        context = {
+            'schedules': schedules,
+            'form': form,
+        }
+        return render(request, 'doctor/schedules.html', context)
+
+class EditDoctorScheduleView(View):
+    def get(self, request, schedule_id):
+        if not hasattr(request.user, 'doctor'):
+            messages.error(request, "You are not authorized to access this page.")
+            return redirect('core:home')
+
+        schedule = get_object_or_404(DoctorSchedule, id=schedule_id, doctor=request.user.doctor)
+        form = DoctorScheduleForm(instance=schedule)
+        context = {
+            'form': form,
+            'schedule': schedule,
+        }
+        return render(request, 'doctor/edit_schedule.html', context)
+
+    def post(self, request, schedule_id):
+        if not hasattr(request.user, 'doctor'):
+            messages.error(request, "You are not authorized to access this page.")
+            return redirect('core:home')
+
+        schedule = get_object_or_404(DoctorSchedule, id=schedule_id, doctor=request.user.doctor)
+        form = DoctorScheduleForm(request.POST, instance=schedule)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Schedule updated successfully.")
+            return redirect('core:doctor_schedules')
+        context = {
+            'form': form,
+            'schedule': schedule,
+        }
+        return render(request, 'doctor/edit_schedule.html', context)
+
+class DeleteDoctorScheduleView(View):
+    def post(self, request, schedule_id):
+        if not hasattr(request.user, 'doctor'):
+            messages.error(request, "You are not authorized to access this page.")
+            return redirect('core:home')
+
+        schedule = get_object_or_404(DoctorSchedule, id=schedule_id, doctor=request.user.doctor)
+        schedule.delete()
+        messages.success(request, "Schedule deleted successfully.")
+        return redirect('core:doctor_schedules')
+
+
+
 class ServiceProvidedView(View):
     def get(self, request):
         if not request.user.is_authenticated:
@@ -251,47 +362,65 @@ class SelectLoginView(TemplateView):
 class PatientSignUpView(FormView):
     template_name = "core/patient_signup.html"
     form_class = PatientSignupForm
-    success_url = reverse_lazy("core:patient_dashboard")
+    success_url = reverse_lazy("core:patient_login")  # Redirect to patient login page
 
     def form_valid(self, form):
-        user = form.save()
-        authenticated_user = authenticate(
-            request=self.request,
-            email=form.cleaned_data["email"],
-            password=form.cleaned_data["password1"]
-        )
-        if authenticated_user:
-            login(self.request, authenticated_user)
-            messages.success(self.request, "You have successfully registered as a Patient.")
-            return super().form_valid(form)
-        else:
-            messages.error(self.request, "Registration failed. Please try again.")
+        try:
+            user = form.save()
+            messages.success(self.request, "You have successfully registered as a Patient. Please log in.")
+            return super().form_valid(form)  # Redirect to patient login page
+        except ValidationError as e:
+            # If email is already in use, redirect to login page
+            if "email is already in use" in str(e).lower():
+                messages.error(self.request, "This email is already registered. Please log in instead.")
+                return redirect('core:patient_login')
+            # Other validation errors
+            messages.error(self.request, str(e))
             return self.form_invalid(form)
+
+    def form_invalid(self, form):
+        # Handle form errors (e.g., email already in use, password mismatch)
+        for field, errors in form.errors.items():
+            for error in errors:
+                if "email is already in use" in error.lower():
+                    messages.error(self.request, "This email is already registered. Please log in instead.")
+                    return redirect('core:patient_login')
+                messages.error(self.request, error)
+        return super().form_invalid(form)
 
 class DoctorSignUpView(FormView):
     template_name = "core/doctor_signup.html"
     form_class = DoctorSignupForm
-    success_url = reverse_lazy("core:doctor_dashboard")
+    success_url = reverse_lazy("core:doctor_login")  # Redirect to doctor login page
 
     def form_valid(self, form):
-        user = form.save()
-        authenticated_user = authenticate(
-            request=self.request,
-            email=form.cleaned_data["email"],
-            password=form.cleaned_data["password1"]
-        )
-        if authenticated_user:
-            login(self.request, authenticated_user)
-            messages.success(self.request, "You have successfully registered as a Doctor.")
-            return super().form_valid(form)
-        else:
-            messages.error(self.request, "Registration failed. Please try again.")
+        try:
+            user = form.save()
+            messages.success(self.request, "You have successfully registered as a Doctor. Please log in.")
+            return super().form_valid(form)  # Redirect to doctor login page
+        except ValidationError as e:
+            # If email is already in use, redirect to login page
+            if "email is already in use" in str(e).lower():
+                messages.error(self.request, "This email is already registered. Please log in instead.")
+                return redirect('core:doctor_login')
+            # Other validation errors
+            messages.error(self.request, str(e))
             return self.form_invalid(form)
 
+    def form_invalid(self, form):
+        # Handle form errors (e.g., email already in use, password mismatch)
+        for field, errors in form.errors.items():
+            for error in errors:
+                if "email is already in use" in error.lower():
+                    messages.error(self.request, "This email is already registered. Please log in instead.")
+                    return redirect('core:doctor_login')
+                messages.error(self.request, error)
+        return super().form_invalid(form)
+    
 class PatientLoginView(FormView):
     template_name = "core/patient_login.html"
     form_class = PatientLoginForm
-    success_url = reverse_lazy("core:patient_dashboard")
+    success_url = reverse_lazy("core:patient_home")
 
     def form_valid(self, form):
         email = form.cleaned_data["email"]
@@ -477,19 +606,70 @@ class PatientEditProfileView(View):
         return render(request, self.template_name, context)
   
 
+class DoctorEditProfileForm(forms.ModelForm):
+    class Meta:
+        model = Doctor
+        fields = [
+            'full_name', 'designation', 'specialty', 'number', 'address',
+            'details', 'qualification', 'consultation_fee', 'certificate_url', 'photo'
+        ]
+        widgets = {
+            'full_name': forms.TextInput(attrs={'class': 'form-control'}),
+            'designation': forms.TextInput(attrs={'class': 'form-control'}),
+            'specialty': forms.Select(attrs={'class': 'form-control select2'}),
+            'number': forms.TextInput(attrs={'class': 'form-control'}),
+            'address': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
+            'details': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
+            'qualification': forms.TextInput(attrs={'class': 'form-control'}),
+            'consultation_fee': forms.NumberInput(attrs={'class': 'form-control', 'min': '0.01', 'step': '0.01'}),
+            'certificate_url': forms.URLInput(attrs={'class': 'form-control'}),
+            'photo': forms.FileInput(attrs={'class': 'custom-file-input', 'accept': 'image/*'}),
+        }
+
+class ExperienceForm(forms.ModelForm):
+    start_date = forms.DateField(widget=forms.TextInput(attrs={'class': 'form-control datetimepicker', 'autocomplete': 'off'}))
+    end_date = forms.DateField(widget=forms.TextInput(attrs={'class': 'form-control datetimepicker', 'autocomplete': 'off'}), required=False)
+
+    class Meta:
+        model = Experience
+        fields = ['medical_company', 'designation', 'department', 'employment_status', 'start_date', 'end_date']
+        widgets = {
+            'medical_company': forms.Select(attrs={'class': 'form-control select2'}),
+            'designation': forms.TextInput(attrs={'class': 'form-control'}),
+            'department': forms.TextInput(attrs={'class': 'form-control'}),
+            'employment_status': forms.Select(attrs={'class': 'form-control'}),
+        }
+
+    def clean(self):
+        cleaned_data = super().clean()
+        start_date = cleaned_data.get('start_date')
+        end_date = cleaned_data.get('end_date')
+
+        if start_date and end_date and end_date < start_date:
+            raise forms.ValidationError("End date cannot be earlier than start date.")
+        return cleaned_data
+
+ExperienceFormSet = inlineformset_factory(
+    Doctor,
+    Experience,
+    form=ExperienceForm,
+    extra=1,
+    max_num=5,
+    can_delete=True
+)
+
 class DoctorEditProfileView(View):
     template_name = 'doctor/edit-profile.html'
 
-    def get(self, request, *args, **kwargs):
-        try:
-            doctor = request.user.doctor
-            profile = request.user.profile
-        except (AttributeError, Doctor.DoesNotExist, UserProfile.DoesNotExist):
-            messages.error(request, 'Doctor profile not found. Please complete your profile.')
-            return redirect('core:doctor_profile')
-        
+    def get(self, request):
+        # Ensure the user is a doctor
+        if not request.user.is_authenticated or not hasattr(request.user, 'doctor'):
+            messages.error(request, "You are not authorized to access this page.")
+            return redirect('core:home')
+
+        doctor = request.user.doctor
         form = DoctorEditProfileForm(instance=doctor)
-        formset = ExperienceFormSet(instance=doctor, queryset=Experience.objects.all()[:5])
+        formset = ExperienceFormSet(instance=doctor)
         context = {
             'form': form,
             'formset': formset,
@@ -497,46 +677,44 @@ class DoctorEditProfileView(View):
         }
         return render(request, self.template_name, context)
 
-    def post(self, request, *args, **kwargs):
-        try:
-            doctor = request.user.doctor
-            profile = request.user.profile
-        except (AttributeError, Doctor.DoesNotExist, UserProfile.DoesNotExist):
-            messages.error(request, 'Doctor profile not found. Please complete your profile.')
-            return redirect('core:doctor_profile')
-        
+    def post(self, request):
+        # Ensure the user is a doctor
+        if not request.user.is_authenticated or not hasattr(request.user, 'doctor'):
+            messages.error(request, "You are not authorized to access this page.")
+            return redirect('core:home')
+
+        doctor = request.user.doctor
         form = DoctorEditProfileForm(request.POST, request.FILES, instance=doctor)
         formset = ExperienceFormSet(request.POST, instance=doctor)
-        
+
+        # Validate the number of experiences
         existing_experiences = Experience.objects.filter(doctor=doctor).count()
-        new_experiences = sum(1 for form in formset if form.cleaned_data and not form.cleaned_data.get('DELETE', False))
-        
+        new_experiences = sum(1 for exp_form in formset if exp_form.is_valid() and exp_form.cleaned_data and not exp_form.cleaned_data.get('DELETE', False))
         if existing_experiences + new_experiences > 5:
-            messages.error(request, 'You cannot add more than 5 experiences.')
+            messages.error(request, "You cannot add more than 5 experiences.")
             context = {
                 'form': form,
                 'formset': formset,
                 'max_experiences': 5,
             }
             return render(request, self.template_name, context)
-        
+
+        # Save the forms if valid
         if form.is_valid() and formset.is_valid():
             form.save()
-            profile.gender = form.cleaned_data['gender']
-            profile.dob = form.cleaned_data['dob']
-            profile.address = form.cleaned_data['address']
-            profile.save()
             formset.save()
-            messages.success(request, 'Profile updated successfully.')
+            messages.success(request, "Profile updated successfully.")
             return redirect('core:doctor_profile')
-        
+
+        # If validation fails, re-render the form with errors
+        messages.error(request, "Please correct the errors below.")
         context = {
             'form': form,
             'formset': formset,
             'max_experiences': 5,
         }
         return render(request, self.template_name, context)
-
+    
 class DoctorsListView(TemplateView):
     template_name = "doctor/doctors_list.html"
 
@@ -685,6 +863,12 @@ class ScheduleAppointmentView(View):
 class PaymentView(View):
     template_name = 'patient/payment.html'
 
+    # Define AppointmentType choices directly in the view
+    class AppointmentType:
+        ONLINE = 'ONLINE', 'Online'
+        IN_PERSON = 'IN_PERSON', 'In-Person'
+        choices = [ONLINE, IN_PERSON]
+
     def get(self, request, *args, **kwargs):
         if not (hasattr(request.user, "profile") and request.user.profile.role == "PATIENT"):
             messages.error(request, "You must be logged in as a patient to make a payment.")
@@ -727,10 +911,13 @@ class PaymentView(View):
             messages.error(request, "This time slot is already booked.")
             return redirect("core:doctors_list")
 
+        # Use the defined AppointmentType choices to get the display value
+        appointment_type_display = dict(self.AppointmentType.choices).get(appointment_type, appointment_type)
+
         context = {
             'doctor': doctor,
             'appointment_type': appointment_type,
-            'appointment_type_display': dict(Appointment.AppointmentType.choices).get(appointment_type, appointment_type),
+            'appointment_type_display': appointment_type_display,
             'date': date_str,
             'time': time_str,
             'time_display': datetime.strptime(time_str, '%H:%M:%S').strftime('%I:%M %p'),
@@ -803,7 +990,7 @@ class PaymentView(View):
 
         messages.success(request, "Payment successful! Your appointment has been booked.")
         return redirect('core:patient_dashboard')
-
+    
 class DoctorAvailabilityView(View):
     template_name = 'doctor/availability.html'
 

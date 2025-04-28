@@ -330,3 +330,26 @@ class ServiceProvided(models.Model):
 
     def __str__(self):
         return f"Service for {self.patient.username} by {self.doctor.full_name} on {self.date} at {self.time}"
+    
+class DoctorSchedule(models.Model):
+    doctor = models.ForeignKey(Doctor, on_delete=models.CASCADE, related_name='schedules')
+    day_of_week = models.CharField(
+        max_length=10,
+        choices=[
+            ('MONDAY', 'Monday'),
+            ('TUESDAY', 'Tuesday'),
+            ('WEDNESDAY', 'Wednesday'),
+            ('THURSDAY', 'Thursday'),
+            ('FRIDAY', 'Friday'),
+            ('SATURDAY', 'Saturday'),
+            ('SUNDAY', 'Sunday'),
+        ]
+    )
+    start_time = models.TimeField()
+    end_time = models.TimeField()
+    notes = models.TextField(blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"{self.doctor.full_name} - {self.day_of_week} from {self.start_time} to {self.end_time}"
